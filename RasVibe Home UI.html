@@ -1,0 +1,2400 @@
+<!DOCTYPE html> 
+<html> 
+<head>     
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer"> 
+    <style>     
+        body { 
+            background-color: #0d1117; 
+            color: #fff; 
+            font-family: sans-serif; 
+            padding: 10px; 
+            margin: 0; 
+            padding-bottom: 90px; 
+            box-sizing: border-box;
+            width: 100%;
+            overflow-x: hidden; 
+        }         
+
+        .live-slider-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            width: 100%;
+            max-width: 100%;
+            padding: 5px 0 10px 0;
+            margin-bottom: 5px;
+            box-sizing: border-box;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            will-change: scroll-position;
+            transform: translateZ(0);
+        }
+        .live-slider-container::-webkit-scrollbar { display: none; }
+        .live-slider-container .card {
+            flex: 0 0 85% !important;
+            max-width: 320px !important;
+            height: 82px !important;
+            padding: 6px 8px !important;
+            box-sizing: border-box !important;
+            overflow: hidden !important;
+            margin-bottom: 0 !important;
+            background: linear-gradient(#182234, #121926) padding-box, 
+                        linear-gradient(135deg, #10b981 0%, #3b82f6 50%, #f43f5e 100%) border-box !important;
+            border: 1.5px solid transparent !important;
+            border-radius: 14px !important;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5) !important;
+            transition: transform 0.15s ease !important;
+        }
+        .live-slider-container .card:active {
+            transform: scale(0.98) !important;
+        }
+
+        .lfe-slider-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            width: 100%;
+            max-width: 100%;
+            padding: 5px 0 10px 0;
+            margin-bottom: 5px;
+            box-sizing: border-box;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            will-change: scroll-position;
+            transform: translateZ(0);
+        }
+        .lfe-slider-container::-webkit-scrollbar { display: none; }
+        .lfe-slider-container .card {
+            flex: 0 0 65% !important;
+            max-width: 220px !important;
+            height: 80px !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            margin-bottom: 0 !important;
+        }
+
+        .category-container { 
+            display: flex; 
+            overflow-x: auto; 
+            gap: 12px; 
+            width: 100%; 
+            max-width: 100%;
+            padding: 5px 0 15px 0;
+            box-sizing: border-box;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+        .category-container::-webkit-scrollbar { display: none; }
+
+        .category-bar { 
+            display: flex; 
+            overflow-x: auto; 
+            gap: 8px; 
+            padding: 5px 0 10px 0; 
+            white-space: nowrap; 
+            margin-bottom: 10px; 
+        }
+        .category-bar::-webkit-scrollbar { display: none; }
+        /* Active category button styling */
+        .cat-btn.active {
+            background: #10b981 !important;
+            color: #ffffff !important;
+        }
+
+        /* Vertical List View for Live Events & Popular Live Events */
+        .live-slider-container.vertical-view,
+        .lfe-slider-container.vertical-view {
+            display: flex !important;
+            flex-direction: column !important;
+            overflow-x: visible !important;
+            overflow-y: visible !important;
+            scroll-snap-type: none !important;
+            gap: 10px !important;
+        }
+        .live-slider-container.vertical-view .card,
+        .lfe-slider-container.vertical-view .card {
+            flex: 1 1 100% !important;
+            max-width: 100% !important;
+            width: 100% !important;
+        }
+
+        .cat-btn { background: #161b22; color: #10b981; border: 2px solid #10b981; padding: 2px 7px; border-radius: 10px; cursor: pointer; font-size: 6px; font-weight: bold; flex-shrink: 0; } /* ফন্ট সাইজ আরও ২০% কমানো হয়েছে */
+        .cat-btn:hover { background: #10b981; color: #fff; }
+        
+        .cat-card { 
+            background: #161b22; 
+            border: 2px solid #10b981; 
+            border-radius: 15px; 
+            padding: 8px; 
+            display: flex; 
+            align-items: center; 
+            cursor: pointer; 
+            flex: 0 0 140px; 
+            height: 43px; /* কার্ডের হাইট আরও ১০% কমানো হয়েছে */
+            box-sizing: border-box; 
+            scroll-snap-align: start;
+        }
+
+        .cat-icon { 
+            width: 27px; height: 27px; border-radius: 50%; background: #fff; margin-right: 8px; 
+            display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;
+        }
+        .cat-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .cat-name { font-size: 7px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #fff; } /* ফন্ট সাইজ আরও ২০% কমানো হয়েছে */
+
+        .card {      
+            background: #182234;      
+            border: 1.5px solid #2d4263;      
+            border-radius: 14px;      
+            padding: 8px;      
+            margin-bottom: 20px;      
+            cursor: pointer;      
+            width: 100%;      
+            box-sizing: border-box;     
+            position: relative !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+            transition: border-color 0.2s ease, transform 0.15s ease;
+        }
+
+        @keyframes gradient-animation {     
+            0% { background-position: 0% 50%; }     
+            50% { background-position: 100% 50%; }     
+            100% { background-position: 0% 50%; } 
+        }             
+
+        .league-header { font-size: 7px; font-weight: bold; margin-bottom: 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 25px; box-sizing: border-box; color: #38bdf8; letter-spacing: 0.3px; } /* ফন্ট সাইজ আরও ২০% কমানো হয়েছে */        
+        .match-row { display: flex; align-items: center; justify-content: space-between; }         
+        .team { display: flex; flex-direction: column; align-items: center; width: 35%; }         
+        .logo-box { width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 1.5px solid #38bdf8; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); }        
+        .logo-box img { width: 100%; height: 100%; object-fit: cover; }         
+        .status { text-align: center; width: 30%; font-size: 6px; font-weight: bold; } /* ফন্ট সাইজ আরও ২০% কমানো হয়েছে */        
+        .timer { font-size: 6px; font-weight: bold; margin-bottom: 2px; } /* ফন্ট সাইজ আরও ২০% কমানো হয়েছে */        
+        .text-green { color: #10b981; } 
+        .text-red { color: #f43f5e; } 
+        .text-orange { color: #f59e0b; }         
+        .start-time { font-size: 5px; color: #fff; } /* ফন্ট সাইজ আরও ২০% কমানো হয়েছে */        
+        .start-date { font-size: 5px; color: #94a3b8; } /* ফন্ট সাইজ আরও ২০% কমানো হয়েছে */        
+        .dot { height: 3px; width: 3px; background-color: #f43f5e; border-radius: 50%; animation: pulse 1s infinite; display: inline-block; }         
+        
+        @keyframes pulse { 
+            0% { opacity: 1; } 
+            50% { opacity: 0; } 
+            100% { opacity: 1; } 
+        }         
+
+        #loader-container { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(13, 17, 23, 0.95); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 1000; 
+        }         
+        .loader { border: 5px solid #333; border-top: 5px solid #10b981; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }         
+        
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }    
+
+        .hot-badge {
+            position: absolute !important;
+            top: 0px !important;
+            right: 0px !important;
+            background: #f43f5e;
+            color: white;
+            padding: 2px 5px;
+            font-size: 5px;
+            font-weight: bold;
+            border-bottom-left-radius: 6px;
+            border-top-right-radius: 12px;
+            z-index: 10 !important;
+            box-shadow: 0 1px 4px rgba(244, 63, 94, 0.4);
+        }
+
+        @keyframes glow-animation {
+            0% { box-shadow: 0px 2px 5px rgba(244, 63, 94, 0.4); }
+            100% { box-shadow: 0px 4px 15px rgba(244, 63, 94, 0.9); }
+        }
+
+        .poster-card {
+            padding: 0 !important;
+            overflow: hidden;
+            background: #161b22;
+            margin-bottom: 20px;
+        }
+
+        .poster-img-box {
+            width: 100%;
+            height: 131px; /* পোস্টার কার্ডের হাইট আরও ১০% কমানো হয়েছে */
+            overflow: hidden;
+            border-top-left-radius: 13px;
+            border-top-right-radius: 13px;
+        }
+        .poster-img-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        .poster-title {
+            font-size: 6px; /* ফন্ট সাইজ আরও ২০% কমানো হয়েছে */
+            font-weight: bold;
+            color: #ffffff;
+            padding: 6px 6px 3px 6px;
+            line-height: 1.4;
+            white-space: pre-line;
+        }
+
+        .poster-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3px 6px 6px 6px;
+            font-size: 5px; /* ফন্ট সাইজ আরও ২০% কমানো হয়েছে */
+            color: #8b949e;
+            border-top: 1px solid #30363d;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .loading-text {
+            text-align: center;
+            font-size: 6px; /* ফন্ট সাইজ আরও ২০% কমানো হয়েছে */
+            color: #8b949e;
+            margin: 15px 0;
+        }
+
+        .lfe-logo-box { width: 100%; height: 100%; background: #21262d; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; margin: 0; border-radius: 0; }         
+        .lfe-logo-box img { width: 100%; height: 100%; object-fit: cover; } 
+        .lfe-card-title { position: absolute; bottom: 0; left: 0; width: 100%; font-size: 5px; font-weight: bold; color: #ffffff; background: rgba(13, 17, 23, 0.55); backdrop-filter: blur(3px); padding: 2px 3px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 2; border-top: 1px solid rgba(255, 255, 255, 0.15); } /* ফন্ট সাইজ আরও ২০% কমানো হয়েছে */
+        .lfe-header-row { display: flex; align-items: center; gap: 8px; margin: 5px 0 10px 5px; }
+        .lfe-header-title { font-size: 13px; font-weight: bold; color: #10b981; text-transform: uppercase; }
+        .lfe-live-indicator { display: inline-flex; align-items: center; gap: 5px; background: rgba(244, 63, 94, 0.15); padding: 2px 7px; border-radius: 10px; border: 1px solid rgba(244, 63, 94, 0.45); }
+        .lfe-dot { height: 6px; width: 6px; background-color: #f43f5e; border-radius: 50%; animation: lfe-pulse 1.2s infinite; display: inline-block; }         
+        @keyframes lfe-pulse { 0% { transform: scale(0.9); opacity: 1; box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.8); } 70% { transform: scale(1.1); opacity: 0.8; box-shadow: 0 0 0 4px rgba(244, 63, 94, 0); } 100% { transform: scale(0.9); opacity: 1; box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); } }
+        .lfe-live-text { font-size: 9px; font-weight: bold; color: #f43f5e; letter-spacing: 0.6px; line-height: 1; }
+    
+/* ===== MOVIE SECTION (from Movie UI) ===== */
+
+:root {
+  --bg:#090d16;
+  --card:#151c2b;
+  --surface:#1c2638;
+  --accent:#e50935;
+  --green:#20d68a;
+  --text:#f5f7fc;
+  --muted:#98a5b9;
+  --columns:3;
+}
+
+.content *, .modal * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+
+
+/* CONTENT */
+
+.content {
+  padding:12px 12px 35px;
+}
+
+.section-title {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  min-height:40px;
+  margin:5px -22px 14px;
+  padding:0 4px;
+  text-align:left;
+}
+
+.section-title .header-view-buttons {
+  gap:4px;
+}
+
+.collection-heading {
+  display:flex;
+  align-items:center;
+  gap:7px;
+  min-width:0;
+}
+
+.section-title h2 {font-size:15px; font-weight:800;}
+
+.movie-count {
+  display:inline-flex;
+  min-width:22px;
+  height:22px;
+  padding:0 6px;
+  align-items:center;
+  justify-content:center;
+  border-radius:11px;
+  background:#1c2638;
+  border:1px solid #2c3a50;
+  color:#20d68a;
+  font-size:11px;
+  font-weight:800;
+  line-height:1;
+}
+
+.header-view-buttons {
+  display:flex;
+  gap:5px;
+}
+
+.view-icon-btn {
+  width:36px;
+  height:32px;
+  padding:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:6px;
+  background:#1c2638;
+  border:1px solid #2c3a50;
+  color:#b7c1d1;
+  cursor:pointer;
+}
+
+.view-icon-btn svg {
+  width:18px;
+  height:18px;
+  display:block;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.view-icon-btn.active {
+  background:#147d50;
+  color:white;
+  border-color:#20d68a;
+}
+
+/* LOAD MORE */
+
+.movie-load-more {
+  display:none;
+  text-align:center;
+  margin-top:16px;
+}
+
+.movie-load-more button {
+  padding:8px 18px;
+  border-radius:8px;
+  background:#1c2638;
+  border:1px solid #2c3a50;
+  color:#b7c1d1;
+  font-size:12px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* MOVIE GRID */
+
+.movie-grid > .loading,
+.movie-grid > .empty {
+  grid-column:1 / -1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  padding:40px 10px;
+  text-align:center;
+}
+
+.movie-grid {
+  display:grid;
+  grid-template-columns:repeat(var(--columns),minmax(0,1fr));
+  gap:12px 9px;
+}
+
+.movie-card {
+  min-width:0;
+  cursor:pointer;
+}
+
+.poster {
+  position:relative;
+  width:100%;
+  aspect-ratio:2/3;
+  overflow:hidden;
+  border-radius:9px;
+  background:#202b3c;
+  border:1px solid #29354a;
+}
+
+.poster img {
+  width:100%;
+  height:100%;
+  object-fit: cover;
+  object-position: center; /* ইমেজের সেন্টার অংশ ফিক্সড রাখবে */
+  display:block;
+}
+
+.poster-overlay {
+  position:absolute;
+  inset:45% 0 0;
+  background:linear-gradient(transparent,rgba(0,0,0,.8));
+}
+
+.play-icon {
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:rgba(229,9,53,.9);
+  display:grid;
+  place-items:center;
+  font-size:14px;
+  opacity:0;
+}
+
+.movie-card:active .play-icon {opacity:1}
+
+.quality-tag {
+  position:absolute;
+  top:6px;
+  left:5px;
+  background:rgba(0,0,0,.8);
+  color:white;
+  padding:4px 6px;
+  font-size:8px;
+  border-radius:4px;
+}
+
+.movie-info {padding:6px 2px 0}
+
+.movie-title {
+  font-size:11px;
+  font-weight:bold;
+  line-height:1.4;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  min-height:30px;
+}
+
+.movie-desc {
+  display: none; /* Hidden in Grid View */
+}
+
+.movie-date {
+  font-size:9px;
+  color:var(--muted);
+  margin-top:3px;
+}
+
+/* LIST VIEW */
+
+.movie-grid.list-view {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.list-view .movie-card {
+  display:flex;
+  align-items:center;
+  width:100%;
+  gap:12px;
+  padding:8px 10px;
+  background:var(--card);
+  border:1px solid #29364b;
+  border-radius:8px;
+}
+
+.list-view .poster {
+  width:75px; 
+  min-width:75px;
+  height:72px;
+  aspect-ratio:unset;
+  border-radius:6px;
+}
+
+.list-view .poster img {
+  width:100%;
+  height:100%;
+  object-fit: cover;
+  object-position: center; /* লিস্ট ভিউতেও ইমেজের সেন্টার ফিক্সড রাখবে */
+}
+
+.list-view .movie-info {
+  flex:1;
+  padding:0;
+  min-width:0;
+}
+
+.list-view .movie-title {
+  font-size:12px;
+  min-height:auto;
+  margin-bottom:2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.list-view .movie-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 9px;
+  color: #a0aab8;
+  margin-top: 1px;
+  line-height: 1.3;
+}
+
+.list-view .movie-date {
+  font-size: 8px;
+  margin-top: 2px;
+}
+
+.list-view .poster-overlay,
+.list-view .play-icon {
+  display:none;
+}
+
+/* LOADING */
+
+.loading,.empty {
+  text-align:center;
+  padding:35px 10px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.spinner {
+  width:26px;
+  height:26px;
+  border:3px solid #344057;
+  border-top-color:var(--green);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+  margin:0 auto 10px;
+}
+
+
+/* DETAILS MODAL */
+
+.modal {
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:100;
+  background:rgba(0,0,0,.85);
+  align-items:flex-start;
+  justify-content:center;
+  padding-top:10px;
+  overflow:hidden;
+  overscroll-behavior:contain;
+  touch-action:pan-y;
+}
+
+.modal.show {display:flex}
+
+.modal-box {
+  width:88%;
+  max-width:350px;
+  max-height:85vh;
+  max-height:85dvh;
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
+  background:#121a29;
+  border-radius:12px;
+  border:1px solid #354158;
+  padding:12px;
+  padding-bottom:calc(12px + env(safe-area-inset-bottom));
+  animation:slideDown .2s ease;
+  scrollbar-width:thin;
+  scrollbar-color:#46556d #121a29;
+}
+
+.modal-box::-webkit-scrollbar {
+  width:3px;
+}
+
+.modal-box::-webkit-scrollbar-thumb {
+  background:#46556d;
+  border-radius:10px;
+}
+
+@keyframes slideDown {
+  from {transform:translateY(-100%)}
+  to {transform:translateY(0)}
+}
+
+.modal-top {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+  position:sticky;
+  top:-12px;
+  z-index:2;
+  background:#121a29;
+  padding:6px 0;
+}
+
+.modal-top h3 {font-size:13px; font-weight:700;}
+
+.close {
+  background:#283449;
+  color:white;
+  border:none;
+  border-radius:50%;
+  width:26px;
+  height:26px;
+  font-size:15px;
+  display:grid;
+  place-items:center;
+  flex-shrink:0;
+  cursor:pointer;
+}
+
+.detail-header {
+  display:flex;
+  gap:9px;
+  margin-bottom:10px;
+}
+
+.detail-poster {
+  width:75px;
+  height:105px;
+  flex-shrink:0;
+  border-radius:6px;
+  object-fit:cover;
+  object-position: center;
+  background:#283449;
+}
+
+.detail-info {min-width:0}
+
+.detail-info h2 {
+  font-size:12px;
+  line-height:1.4;
+  margin-bottom:4px;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+.detail-info p {
+  font-size:9px;
+  color:var(--muted);
+  line-height:1.4;
+}
+
+.details-text {
+  white-space:pre-line;
+  color:#c0cada;
+  font-size:10px;
+  line-height:1.5;
+  padding:8px 9px;
+  border-radius:7px;
+  background:#1a2537;
+  margin-bottom:10px;
+  max-height:90px;
+  overflow-y:auto;
+}
+
+.option-title {
+  font-size:10px;
+  font-weight:bold;
+  margin-bottom:6px;
+  color:#a5c4b3;
+}
+
+.video-options {
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-bottom:8px;
+}
+
+.video-option {
+  width:100%;
+  padding:10px 11px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:#202c40;
+  color:white;
+  border:1px solid #34435c;
+  border-radius:7px;
+  text-align:left;
+  font-size:10px;
+  cursor:pointer;
+}
+
+.video-option:active {background:#394861}
+
+.video-option span:last-child {
+  color:#20d68a;
+  font-weight:bold;
+}
+
+
+/* ===== LIVE TV CHANNELS (new, self-contained) ===== */
+.ltv-wrapper { margin-bottom: 15px; }
+.ltv-slider-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    width: 100%;
+    max-width: 100%;
+    padding: 5px 0 10px 0;
+    box-sizing: border-box;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+.ltv-slider-container::-webkit-scrollbar { display: none; }
+.ltv-card {
+    flex: 0 0 96px;
+    height: 60px;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    box-sizing: border-box;
+    border: 1.5px solid transparent;
+    background: linear-gradient(#ffffff, #ffffff) padding-box,
+                linear-gradient(135deg, #10b981 0%, #3b82f6 50%, #f43f5e 100%) border-box;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+    transition: transform 0.15s ease;
+}
+.ltv-card:active { transform: scale(0.96); }
+.ltv-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+    padding: 3px;
+    box-sizing: border-box;
+}
+.ltv-card img.ltv-fallback { background: #1e293b; padding: 12px; }
+
+</style>
+</head>
+<body>
+
+<div id="loader-container">
+    <div class="loader"></div>
+</div>
+
+<div id="liveWrapper" style="margin-bottom: 15px;">
+    <div class="lfe-header-row" style="display: flex; align-items: center; justify-content: space-between; margin: 5px 0 8px 5px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 13px; font-weight: bold; color: #10b981; text-transform: uppercase;">My Live Events</span>
+            <div class="lfe-live-indicator">
+                <span class="lfe-dot"></span>
+                <span class="lfe-live-text">LIVE</span>
+            </div>
+        </div>
+        <button class="view-icon-btn" id="liveViewToggleBtn" onclick="toggleLiveView()" title="Toggle List/Slider View" aria-label="Toggle List/Slider View" style="padding: 4px 6px; background: #161b22; border: 1px solid #30363d; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #10b981;">
+            <svg id="liveViewToggleSvg" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+    <div id="liveCatContainer" class="category-bar"></div>
+    <div class="live-slider-container" id="liveSliderContainer"></div> 
+</div>
+
+<div class="lfe-wrapper" style="margin-bottom: 15px;">
+    <div class="lfe-header-row" style="display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="lfe-header-title">popular Live Events (Auto)</span>
+            <div class="lfe-live-indicator">
+                <span class="lfe-dot"></span>
+                <span class="lfe-live-text">LIVE</span>
+            </div>
+        </div>
+        <button class="view-icon-btn" id="lfeViewToggleBtn" onclick="toggleLfeView()" title="Toggle List/Slider View" aria-label="Toggle List/Slider View" style="padding: 4px 6px; background: #161b22; border: 1px solid #30363d; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #10b981;">
+            <svg id="lfeViewToggleSvg" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+    <div id="lfeCatContainer" class="category-bar"></div>
+    <div class="lfe-slider-container" id="lfeSliderContainer"><div style="color: #8b949e; font-size: 12px; padding: 10px;">Loading live events...</div></div>
+</div>
+
+<div style="font-size: 13px; font-weight: bold; margin: 15px 0 10px 5px; color: #10b981;" id="categoryTitleMain">CATEGORIES</div>
+
+<div class="category-container">
+    <div class="cat-card" onclick="sendData('https://Playlist>tv9.workerbot-tv9.workers.dev/toffee.m3u')">
+        <div class="cat-icon"><img src="https://media.licdn.com/dms/image/v2/C560BAQH4VBSB9lGpTA/company-logo_200_200/company-logo_200_200/0/1630668356175?e=2147483647&v=beta&t=YHP4YFiZr_hR9Xyu8PlNcxfCbr1PTYjjqPw5zTzsyfU"></div><div class="cat-name">Toffee</div>
+    </div>
+
+    <div class="cat-card" onclick="sendData('https://Playlist>raw.githubusercontent.com/abusaeeidx/Mrgify-BDIX-IPTV/refs/heads/main/playlist.m3u')">
+        <div class="cat-icon"><img src="https://raw.githubusercontent.com/abusaeeidx/Mrgify-BDIX-IPTV/refs/heads/main/image/Picsart_25-11-23_23-36-41-742.png"></div><div class="cat-name">Mrgify</div>
+    </div>
+
+    
+    <div class="cat-card" onclick="sendData('https://Playlist>raw.githubusercontent.com/raselmia9/Crichd-Auto-Update/refs/heads/main/playlist.m3u')">
+        <div class="cat-icon"><img src="https://m.media-amazon.com/images/I/21h60OobgjL.jpg"></div><div class="cat-name">CricHD</div>
+    </div>
+    
+    <div class="cat-card" onclick="sendData('https://Playlist>raw.githubusercontent.com/srhady/Fancode-bd/refs/heads/main/main_playlist.m3u')">
+        <div class="cat-icon"><img src="https://upload.wikimedia.org/wikipedia/en/thumb/6/6c/FanCode_logo.svg/500px-FanCode_logo.svg.png"></div><div class="cat-name">Fancode</div>
+    </div>
+    <div class="cat-card" onclick="sendData('https://Playlist>raw.githubusercontent.com/srhady/SonyLiv/refs/heads/main/sonyliv_playlist.m3u')">
+        <div class="cat-icon"><img src="https://www.freelogovectors.net/wp-content/uploads/2021/12/sonyliv-logo-freelogovectors.net_.png"></div><div class="cat-name">SonyLiv</div>
+    </div>
+    <div class="cat-card" onclick="sendData('https://Playlist>gist.githubusercontent.com/albatr0ssss/3cff7a26be49b1d352c15f615067e7cd/raw/tapmad_bd.m3u')">
+        <div class="cat-icon"><img src="https://raw.githubusercontent.com/raselmia01733/RasVibe-App-All-Data/refs/heads/main/tapmad%20icon.png"></div><div class="cat-name">Tapmad</div>
+    </div>
+    <div class="cat-card" onclick="sendData('https://Playlist>raw.githubusercontent.com/srhady/willow-event/refs/heads/main/live_sports.m3u')">
+        <div class="cat-icon"><img src="https://cdn-icons-png.flaticon.com/512/2921/2921226.png"></div><div class="cat-name">Willow Event</div>
+    </div>
+    
+    <div class="cat-card" onclick="sendData('https://Playlist>raw.githubusercontent.com/raselmia9/My-all-Playlist/refs/heads/main/iScreen-Live-channel.m3u')">
+        <div class="cat-icon"><img src="https://static.wikia.nocookie.net/etv-gspn-bangla/images/1/18/IScreen_logo.png/revision/latest/scale-to-width-down/837?cb=20231207080112"></div><div class="cat-name">iScreen</div>
+    </div>
+    <div class="cat-card" onclick="sendData('https://Playlist>raw.githubusercontent.com/DrSujonPaul/Sujon/6dc6a1d4eaa20a9239ae27d8e0f00182b60eeb47/iptv')">
+        <div class="cat-icon"><img src="https://flagcdn.com/bd.svg"></div><div class="cat-name">Bangla</div>
+    </div>
+    <div class="cat-card" onclick="sendData('https://Playlist>raw.githubusercontent.com/DrSujonPaul/Sujon/6dc6a1d4eaa20a9239ae27d8e0f00182b60eeb47/iptv')">
+        <div class="cat-icon"><img src="https://cdn-icons-png.flaticon.com/512/651/651717.png"></div><div class="cat-name">Musics</div>
+    </div>
+</div>
+
+<!-- LIVE TV CHANNELS (new) -->
+<div class="ltv-wrapper" id="ltvWrapper">
+    <div class="lfe-header-row">
+        <span class="lfe-header-title">LIVE TV CHANNELS</span>
+        <div class="lfe-live-indicator">
+            <span class="lfe-dot"></span>
+            <span class="lfe-live-text">LIVE</span>
+        </div>
+    </div>
+    <div class="ltv-slider-container" id="ltvSliderContainer"></div>
+</div>
+
+<div class="content">
+
+  <div class="section-title">
+    <div class="collection-heading">
+      <h2>Popular Collection</h2>
+      <span class="movie-count" id="movieCount" aria-label="মুভির সংখ্যা">0</span>
+    </div>
+    <div class="header-view-buttons">
+      <button class="view-icon-btn active" id="gridBtn" title="Grid View" aria-label="Grid View"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></button>
+      <button class="view-icon-btn" id="listBtn" title="List View" aria-label="List View"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="9" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="9" y1="18" x2="21" y2="18"/><line x1="3.5" y1="6" x2="4.5" y2="6"/><line x1="3.5" y1="12" x2="4.5" y2="12"/><line x1="3.5" y1="18" x2="4.5" y2="18"/></svg></button>
+    </div>
+  </div>
+
+  <div id="movieGrid" class="movie-grid">
+    <div class="loading">
+      <div class="spinner"></div>
+      Loading movies...
+    </div>
+  </div>
+
+  <div id="movieLoadMore" class="movie-load-more">
+    <button id="movieLoadMoreBtn" type="button">আরও মুভি দেখুন</button>
+    <div id="movieSentinel" style="height:1px;"></div>
+  </div>
+
+</div>
+
+<!-- DETAILS MODAL -->
+
+<div class="modal" id="movieModal">
+
+  <div class="modal-box" id="modalBox">
+
+    <div class="modal-top">
+      <h3>Movie Details</h3>
+      <button class="close" id="closeModal">×</button>
+    </div>
+
+    <div class="detail-header">
+      <img class="detail-poster" id="detailPoster" src="" alt="">
+      <div class="detail-info">
+        <h2 id="detailTitle"></h2>
+        <p id="detailDate"></p>
+        <p id="detailLinkCount"></p>
+      </div>
+    </div>
+
+    <div class="details-text" id="detailDescription"></div>
+
+    <div class="option-title">Watch / Quality Options</div>
+
+    <div class="video-options" id="videoOptions"></div>
+
+  </div>
+
+</div>
+
+
+
+
+
+
+<script>    
+const showLiveSlider = true ;
+
+let currentSearch = '';
+
+document.addEventListener('DOMContentLoaded', () => { 
+    const forceHideTimer = setTimeout(hideLoader, 1500);
+
+    if (showLiveSlider) {
+        async function fetchLiveMatches() {
+            const endpoints = [
+                'https://raw.githubusercontent.com/raselmia01733/Event_match/refs/heads/main/matches.json'
+                
+            ];
+            for (const url of endpoints) {
+                try {
+                    const res = await fetch(url);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (Array.isArray(data) && data.length > 0) {
+                            loadLiveMatches(data);
+                            return;
+                        }
+                    }
+                } catch(e) {}
+            }
+            console.log('Live matches data not reached');
+        }
+        fetchLiveMatches();
+    } else {
+        const liveWrapper = document.getElementById('liveWrapper');
+        if (liveWrapper) liveWrapper.style.display = 'none';
+    }
+    
+    
+    setTimeout(initMultiPlaylists, 10);
+
+    setInterval(updateTimers, 1000);
+
+}); 
+
+function hideLoader() {
+    const loader = document.getElementById('loader-container');
+    if (loader) {
+        loader.style.display = 'none'; 
+    }
+}
+
+
+let isLiveVertical = false;
+function toggleLiveView() {
+    isLiveVertical = !isLiveVertical;
+    const container = document.getElementById("liveSliderContainer");
+    const svg = document.getElementById("liveViewToggleSvg");
+    if (container) {
+        container.classList.toggle("vertical-view", isLiveVertical);
+    }
+    if (svg) {
+        if (isLiveVertical) {
+            svg.innerHTML = '<rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect>';
+        } else {
+            svg.innerHTML = '<line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line>';
+        }
+    }
+}
+
+let isLfeVertical = false;
+function toggleLfeView() {
+    isLfeVertical = !isLfeVertical;
+    const container = document.getElementById("lfeSliderContainer");
+    const svg = document.getElementById("lfeViewToggleSvg");
+    if (container) {
+        container.classList.toggle("vertical-view", isLfeVertical);
+    }
+    if (svg) {
+        if (isLfeVertical) {
+            svg.innerHTML = '<rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect>';
+        } else {
+            svg.innerHTML = '<line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line>';
+        }
+    }
+}
+
+let allLiveMatches = [];
+let liveActiveCategory = "All";
+const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
+
+const CRICKET_TEAMS_PRIORITY = [
+    "BANGLADESH", "INDIA", "PAKISTAN", "AUSTRALIA", "ENGLAND", "SOUTH AFRICA", "NEW ZEALAND",
+    "SRI LANKA", "AFGHANISTAN", "WEST INDIES"
+];
+
+const FOOTBALL_TEAMS_PRIORITY = [
+    "ARGENTINA", "BRAZIL", "PORTUGAL", "SPAIN", "FRANCE", "GERMANY",
+    "REAL MADRID", "BARCELONA", "MANCHESTER CITY", "MANCHESTER UNITED",
+    "ARSENAL", "LIVERPOOL", "CHELSEA", "BAYERN", "PSG", "JUVENTUS", "INTER", "AC MILAN"
+];
+
+function getMatchPriorityScore(match) {
+    const text = `${match.eventTitle || ""} ${match.team1Title || ""} ${match.team2Title || ""}`.toUpperCase();
+    for (const team of CRICKET_TEAMS_PRIORITY) {
+        if (text.includes(team)) return 30;
+    }
+    if (text.includes("CRICKET") || text.includes("T20") || text.includes("ODI") || text.includes("TEST") || 
+        text.includes("BPL") || text.includes("IPL") || text.includes("PSL") || text.includes("BIG BASH") || text.includes("ICC")) {
+        return 25;
+    }
+    for (const team of FOOTBALL_TEAMS_PRIORITY) {
+        if (text.includes(team)) return 20;
+    }
+    if (text.includes("FOOTBALL") || text.includes("SOCCER") || text.includes("LEAGUE") || text.includes("CHAMPIONS")) {
+        return 10;
+    }
+    return 0;
+}
+
+function parseMatchDate(str) {
+    if (!str) return 0;
+    let d = new Date(str.replace(" ", "T")).getTime();
+    if (isNaN(d)) d = new Date(str).getTime();
+    return isNaN(d) ? 0 : d;
+}
+
+function isMatchFinishedExpired(match, now) {
+    if (!now) now = Date.now();
+    const start = parseMatchDate(match.matchTime);
+    if (!start) return false;
+    const league = (match.eventTitle || "").toUpperCase();
+    let maxDuration = 10800000; // 3h default
+    if (league.includes("ODI")) maxDuration = 36000000;
+    else if (league.includes("TEST")) maxDuration = 432000000;
+    
+    const finishedAt = start + maxDuration;
+    return (now - finishedAt) > TWO_HOURS_MS;
+}
+
+function getMatchState(match, now) {
+    if (!now) now = Date.now();
+    const start = parseMatchDate(match.matchTime);
+    if (!start) return 1;
+
+    const diff = start - now;
+    const elapsed = Math.abs(diff);
+    const league = (match.eventTitle || "").toUpperCase();
+
+    let maxDuration = 10800000; // 3h default
+    if (league.includes("ODI")) maxDuration = 36000000;
+    else if (league.includes("TEST")) maxDuration = 432000000;
+
+    if (diff <= 0) {
+        if (elapsed <= maxDuration) return 0; // Live
+        return 2; // Finished
+    } else {
+        return 1; // Upcoming
+    }
+}
+
+function sortMatches(list) {
+    const now = Date.now();
+    return list.slice().sort((a, b) => {
+        const stateA = getMatchState(a, now);
+        const stateB = getMatchState(b, now);
+
+        if (stateA !== stateB) {
+            return stateA - stateB; // 0: Live, 1: Upcoming, 2: Finished
+        }
+
+        const scoreA = getMatchPriorityScore(a);
+        const scoreB = getMatchPriorityScore(b);
+        if (scoreA !== scoreB) {
+            return scoreB - scoreA;
+        }
+
+        if (a.isHot && !b.isHot) return -1;
+        if (!a.isHot && b.isHot) return 1;
+
+        const timeA = parseMatchDate(a.matchTime);
+        const timeB = parseMatchDate(b.matchTime);
+
+        if (stateA === 0) {
+            return timeA - timeB;
+        } else if (stateA === 1) {
+            return timeA - timeB;
+        } else {
+            return timeB - timeA;
+        }
+    });
+}
+
+function buildMatchCard(match) {
+    const defaultLogoUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='20' fill='%231e293b'/%3E%3Cpath d='M20 10l8 4v6c0 5-3.5 9.7-8 11-4.5-1.3-8-6-8-11v-6l8-4z' fill='%2310b981'/%3E%3C/svg%3E"; 
+    let card = document.createElement("div");
+    card.className = "card";
+    card.setAttribute("data-start", match.matchTime || "");
+
+    const league = (match.eventTitle || "").toUpperCase();
+    let maxDuration = 10800000;
+    if (league.includes("ODI")) maxDuration = 36000000;
+    else if (league.includes("TEST")) maxDuration = 432000000;
+    card.setAttribute("data-max-dur", maxDuration);
+    card.setAttribute("data-test", league.includes("TEST") ? "1" : "0");
+
+    let start = parseMatchDate(match.matchTime);
+    let timeStr = "";
+    let dateStr = "";
+    if (start > 0) {
+        let dateObj = new Date(start);
+        timeStr = dateObj.toLocaleTimeString([], {hour: "2-digit", minute:"2-digit", hour12: true});
+        dateStr = dateObj.toLocaleDateString("en-GB");
+    }
+
+    const liveTeams = [match.team1Title, match.team2Title].filter(Boolean).join(" vs ");
+    const liveTitle = [match.eventTitle, liveTeams].filter(Boolean).join(" - ");
+    card.onclick = function() { sendMedia(liveTitle, "", match.streamLink); };
+    card.innerHTML = `
+        ${match.isHot ? '<div class="hot-badge">HOT 🔥</div>' : ""}
+        <div class="league-header" title="${match.eventTitle}">${match.eventTitle}</div>         
+        <div class="match-row">             
+            <div class="team" style="display:flex; flex-direction:column; align-items:center; text-align:center;">
+                <div class="logo-box">
+                    <img src="${match.team1Logo || defaultLogoUrl}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='${defaultLogoUrl}';">
+                </div>
+                <div style="font-size:10px; margin-top:3px; width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#f8fafc; font-weight:600; text-align:center;" title="${match.team1Title}">${match.team1Title}</div>
+            </div>             
+            <div class="status" data-start="${match.matchTime}">
+                <div class="timer">--:--:--</div>
+                <div class="start-time">${timeStr}</div>
+                <div class="start-date">${dateStr}</div>
+            </div>             
+            <div class="team" style="display:flex; flex-direction:column; align-items:center; text-align:center;">
+                <div class="logo-box">
+                    <img src="${match.team2Logo || defaultLogoUrl}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='${defaultLogoUrl}';">
+                </div>
+                <div style="font-size:10px; margin-top:3px; width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#f8fafc; font-weight:600; text-align:center;" title="${match.team2Title}">${match.team2Title}</div>
+            </div>         
+        </div>
+    `;
+    return card;
+}
+
+function renderLiveCategories() {
+    const bar = document.getElementById("liveCatContainer");
+    if (!bar) return;
+
+    const counts = {
+        All: 0,
+        Live: 0,
+        Upcoming: 0,
+        Recent: 0,
+        "Hot Matches": 0
+    };
+
+    const now = Date.now();
+    const validMatches = allLiveMatches.filter(m => !isMatchFinishedExpired(m, now));
+
+    validMatches.forEach(match => {
+        const state = getMatchState(match, now);
+        counts.All++;
+        if (state === 0) counts.Live++;
+        else if (state === 1) counts.Upcoming++;
+        else if (state === 2) counts.Recent++;
+
+        if (match.isHot) counts["Hot Matches"]++;
+    });
+
+    const cats = ["All", "Live", "Upcoming", "Recent", "Hot Matches"];
+    bar.innerHTML = cats.map(cat => {
+        const count = counts[cat] || 0;
+        const activeClass = (cat === liveActiveCategory) ? " active" : "";
+        return `<button class="cat-btn${activeClass}" onclick="window.liveFilterCat('${cat}')">${cat} (${count})</button>`;
+    }).join("");
+}
+
+window.liveFilterCat = function(category) {
+    liveActiveCategory = category;
+    renderLiveCategories();
+    renderAllLiveMatches();
+};
+
+function renderAllLiveMatches() {
+    const container = document.getElementById("liveSliderContainer");
+    if (!container) return;
+
+    const now = Date.now();
+    const validMatches = allLiveMatches.filter(m => !isMatchFinishedExpired(m, now));
+
+    const filtered = validMatches.filter(match => {
+        const state = getMatchState(match, now);
+        if (liveActiveCategory === "All") return true;
+        if (liveActiveCategory === "Live") return state === 0;
+        if (liveActiveCategory === "Upcoming") return state === 1;
+        if (liveActiveCategory === "Recent") return state === 2;
+        if (liveActiveCategory === "Hot Matches") return !!match.isHot;
+        return true;
+    });
+
+    container.innerHTML = "";
+    if (filtered.length === 0) {
+        container.innerHTML = `<div style="color: #8b949e; font-size: 12px; padding: 10px;">No ${liveActiveCategory} matches found.</div>`;
+        return;
+    }
+
+    const frag = document.createDocumentFragment();
+    filtered.forEach(match => {
+        frag.appendChild(buildMatchCard(match));
+    });
+    container.appendChild(frag);
+    updateTimers();
+}
+
+function loadLiveMatches(matches) {
+    const container = document.getElementById("liveSliderContainer");
+    const liveWrapper = document.getElementById("liveWrapper");
+    if (!container || !liveWrapper) return;
+    
+    if (!showLiveSlider || !Array.isArray(matches) || matches.length === 0) {
+        liveWrapper.style.display = "none";
+        return;
+    }
+
+    const now = Date.now();
+    const validMatches = matches.filter(m => !isMatchFinishedExpired(m, now));
+
+    if (validMatches.length === 0) {
+        liveWrapper.style.display = "none";
+        return;
+    }
+
+    allLiveMatches = sortMatches(validMatches);
+    liveActiveCategory = "All";
+
+    liveWrapper.style.display = "block";
+    renderLiveCategories();
+    renderAllLiveMatches();
+}
+
+const LFE_BATCH_SIZE = 5;
+let lfeAllChannels = [];
+let lfeCategories = new Set();
+let lfeActiveCategory = "All";
+let lfeCurrentFiltered = [];
+let lfeRenderedCount = 0;
+let isLfeScrollAttached = false;
+
+async function initMultiPlaylists() {
+    const sliderContainer = document.getElementById('lfeSliderContainer');
+    
+    if (sliderContainer) {
+        sliderContainer.innerHTML = '<div style="color: #8b949e; font-size: 12px; padding: 10px;" id="lfeCountdownText">Checking live events (1.5s)...</div>';
+    }
+
+    let timeLeft = 15; 
+    let countdownInterval = setInterval(() => {
+        timeLeft--;
+        let countText = document.getElementById('lfeCountdownText');
+        if (countText && timeLeft > 0) {
+            let secondsVal = (timeLeft / 10).toFixed(1);
+            countText.innerText = `Checking live events (${secondsVal}s)...`;
+        }
+    }, 100);
+
+    const targetPlaylists = [
+       { url: "https://raw.githubusercontent.com/raselmia9/Fancodebd2/refs/heads/main/playlist.m3u", sourceName: "fancode" },
+ 
+
+
+ { url: "https://raw.githubusercontent.com/srhady/willow-event/refs/heads/main/live_sports.m3u", sourceName: "willow" },
+       { url: "https://raw.githubusercontent.com/srhady/SonyLiv/refs/heads/main/sonyliv_playlist.m3u", sourceName: "sonyliv" },
+       { url: "https://gist.githubusercontent.com/albatr0ssss/3cff7a26be49b1d352c15f615067e7cd/raw/tapmad_bd.m3u", sourceName: "tapmad" },
+
+     
+ { url: "https://raw.githubusercontent.com/srhady/willow-event/refs/heads/main/primevideo_sports.m3u", sourceName: "Primevide" }
+
+
+    ];
+
+    let allParsedChannels = [];
+
+    let promises = targetPlaylists.map(async (item) => {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 1500); 
+
+            let res = await fetch(item.url, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (res.ok) {
+                let text = await res.text();
+                if (text && text.includes("#EXTINF")) {
+                    return { text, sourceName: item.sourceName }; 
+                }
+            }
+        } catch (e) {}
+        
+        return null; 
+    });
+
+    let results = await Promise.all(promises);
+    clearInterval(countdownInterval);
+
+    results.forEach(result => {
+        if (result && result.text) {
+            parseAndAddChannels(result.text, result.sourceName);
+        }
+    });
+
+    lfeAllChannels = allParsedChannels;
+
+    if (lfeAllChannels.length > 0) {
+        renderLfeCategories();
+        renderLfeSlider();
+    } else {
+        if (sliderContainer) {
+            sliderContainer.innerHTML = '<div style="color: #8b949e; font-size: 12px; padding: 10px;">বর্তমানে কোনো লাইভ ইভেন্ট উপলব্ধ নেই</div>';
+        }
+    }
+
+    function parseAndAddChannels(data, defaultSource) {
+        const lines = data.split(/\r?\n/);
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].startsWith("#EXTINF")) {
+                let lineStr = lines[i];
+                let name = lineStr.split(',').pop().trim();
+                let group = lineStr.includes('group-title="') ? lineStr.split('group-title="')[1].split('"')[0] : "Others";
+                let logo = lineStr.match(/tvg-logo="(.*?)"/)?.[1] || '';
+                
+                let j = i + 1;
+                let url = "", licenseKey = "", cookie = "", referer = "";
+
+                while (j < lines.length && !lines[j].startsWith("#EXTINF")) {
+                    let line = lines[j].trim();
+                    if (line.startsWith("http")) url = line;
+                    if (line.includes("license_key=")) licenseKey = line.split("license_key=")[1].trim();
+                    if (line.includes("Edge-Cache-Cookie=")) cookie = line.split("Edge-Cache-Cookie=")[1].split(/[ "']/)[0];
+                    if (line.includes("http-referrer=")) referer = line.split("http-referrer=")[1].split(/[ "']/)[0];
+                    j++;
+                }
+
+                let finalOutput = url;
+                if (cookie) finalOutput += `|Cookie=Edge-Cache-Cookie=${cookie}`;
+                if (referer) finalOutput += `|Referer=${referer}`;
+                if (licenseKey) finalOutput += `|drmScheme=clearkey&drmLicense=${licenseKey}`;
+
+                if (url && url.trim() !== "") {
+                    allParsedChannels.push({ name, url: finalOutput, logo, group, source: defaultSource });
+                    lfeCategories.add(group);
+                }
+                i = j - 1;
+            }
+        }
+    }
+}
+
+function renderLfeCategories() {
+    const bar = document.getElementById('lfeCatContainer');
+    if (!bar) return;
+    
+    const customOrder = ["Cricket", "Football"];
+    let otherCats = Array.from(lfeCategories).filter(cat => !customOrder.includes(cat)).sort();
+    let sortedCats = [...customOrder.filter(cat => lfeCategories.has(cat)), ...otherCats];
+
+    const allActive = (lfeActiveCategory === 'All') ? ' active' : '';
+    bar.innerHTML = `<button class="cat-btn${allActive}" onclick="window.lfeFilterCat('All')">All (${lfeAllChannels.length})</button>`;
+    sortedCats.forEach(cat => {
+        const count = lfeAllChannels.filter(ch => ch.group === cat).length;
+        const active = (lfeActiveCategory === cat) ? ' active' : '';
+        bar.innerHTML += `<button class="cat-btn${active}" onclick="window.lfeFilterCat('${cat}')">${cat} (${count})</button>`;
+    });
+}
+
+function buildLfeCard(ch) {
+    let siteIcon = 'https://i.ibb.co/3W68Z93/shield.png'; 
+    let source = (ch.source || '').toLowerCase();
+    let groupLower = (ch.group || '').toLowerCase();
+    let nameLower = (ch.name || '').toLowerCase();
+
+    if (source === 'fancode' || groupLower.includes('fancode') || nameLower.includes('fancode')) {
+        siteIcon = 'https://upload.wikimedia.org/wikipedia/en/thumb/6/6c/FanCode_logo.svg/500px-FanCode_logo.svg.png';
+    } else if (source === 'tapmad' || groupLower.includes('tapmad') || nameLower.includes('tapmad')) {
+        siteIcon = 'https://raw.githubusercontent.com/raselmia01733/RasVibe-App-All-Data/refs/heads/main/tapmad%20icon.png';
+    } else if (source === 'sonyliv' || groupLower.includes('sony') || nameLower.includes('sonyliv')) {
+        siteIcon = 'https://www.freelogovectors.net/wp-content/uploads/2021/12/sonyliv-logo-freelogovectors.net_.png';
+    } else if (source === 'willow' || groupLower.includes('willow') || nameLower.includes('willow')) {
+        siteIcon = 'https://cdn-icons-png.flaticon.com/512/2921/2921226.png';
+    } else if (source === 'prime' || source === 'amazon' || groupLower.includes('prime') || nameLower.includes('prime')) {
+        siteIcon = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Amazon_Prime_Video_logo.svg/1920px-Amazon_Prime_Video_logo.svg.png';
+    }
+
+    const defaultSvg = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='20' fill='%231e293b'/%3E%3Cpath d='M20 10l8 4v6c0 5-3.5 9.7-8 11-4.5-1.3-8-6-8-11v-6l8-4z' fill='%2310b981'/%3E%3C/svg%3E";
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.onclick = () => sendMedia(ch.name || "", "", ch.url);
+    card.innerHTML = `
+        <div class="lfe-logo-box">
+            <div style="position: absolute; top: 7px; left: 7px; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; overflow: hidden; z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">
+                <img src="${siteIcon}" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='${defaultSvg}';">
+            </div>
+
+            <img src="${ch.logo || defaultSvg}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null; this.src='${defaultSvg}';">
+            <div class="lfe-card-title">${ch.name}</div>
+        </div>
+    `;
+    return card;
+}
+
+function renderLfeSlider() {
+    const sliderContainer = document.getElementById('lfeSliderContainer');
+    if (!sliderContainer) return;
+
+    sliderContainer.innerHTML = '';
+    sliderContainer.scrollLeft = 0;
+
+    lfeCurrentFiltered = lfeActiveCategory === 'All'
+        ? lfeAllChannels
+        : lfeAllChannels.filter(ch => ch.group === lfeActiveCategory);
+
+    if (lfeCurrentFiltered.length === 0) {
+        sliderContainer.innerHTML = '<div style="color: #8b949e; font-size: 12px; padding: 10px;">No live events in this category.</div>';
+        return;
+    }
+
+    const frag = document.createDocumentFragment();
+    lfeCurrentFiltered.forEach(ch => {
+        frag.appendChild(buildLfeCard(ch));
+    });
+    sliderContainer.appendChild(frag);
+}
+
+window.lfeFilterCat = function(cat) {
+    lfeActiveCategory = cat;
+    renderLfeCategories();
+    renderLfeSlider();
+};
+
+function filterMatches(input) {
+    currentSearch = input ? input.toLowerCase().trim() : '';
+
+    const liveWrapper = document.getElementById('liveWrapper');
+    const lfeWrapper = document.querySelector('.lfe-wrapper');
+    const categoryContainer = document.querySelector('.category-container');
+    const categoryTitleMain = document.getElementById('categoryTitleMain');
+
+    if (currentSearch !== '') {
+        if (liveWrapper) liveWrapper.style.display = 'none';
+        if (lfeWrapper) lfeWrapper.style.display = 'none';
+        if (categoryContainer) categoryContainer.style.display = 'none';
+        if (categoryTitleMain) categoryTitleMain.style.display = 'none';
+    } else {
+        if (liveWrapper) liveWrapper.style.display = showLiveSlider ? 'block' : 'none';
+        if (lfeWrapper) lfeWrapper.style.display = 'block';
+        if (categoryContainer) categoryContainer.style.display = 'flex';
+        if (categoryTitleMain) categoryTitleMain.style.display = 'block';
+    }
+
+    applyMovieSearch(currentSearch);
+}
+
+
+function updateTimers() { 
+    if (!showLiveSlider) return;
+    
+    const now = Date.now();
+    const cards = document.querySelectorAll("#liveSliderContainer .card");
+    if (!cards || cards.length === 0) return;
+
+    for (let i = 0; i < cards.length; i++) {
+        const card = cards[i];
+        const timerEl = card.querySelector(".timer");
+        if (!timerEl) continue;
+
+        const startStr = card.getAttribute("data-start");
+        if (!startStr) continue;
+
+        const start = parseMatchDate(startStr);
+        if (!start) continue;
+
+        const diff = start - now;
+        const elapsed = Math.abs(diff);
+        const maxDuration = parseInt(card.getAttribute("data-max-dur"), 10) || 10800000;
+        const isTest = card.getAttribute("data-test") === "1";
+
+        if (diff < 0) { 
+            if (isTest) {
+                let testDayDuration = 21600000; 
+                let totalDayCycle = 86400000;  
+                let currentDayNumber = Math.floor(elapsed / totalDayCycle) + 1;
+                let daySessionMod = elapsed % totalDayCycle;
+
+                if (currentDayNumber <= 5 && daySessionMod <= testDayDuration) {
+                    if (timerEl.className !== "timer text-red") timerEl.className = "timer text-red";
+                    timerEl.innerHTML = `<div class="dot"></div> Day ${currentDayNumber} | Live Session`;
+                } else if (currentDayNumber <= 5) {
+                    if (timerEl.className !== "timer text-orange") timerEl.className = "timer text-orange";
+                    timerEl.textContent = `Day ${Math.min(currentDayNumber, 5)} | Stumps / Break`;
+                } else {
+                    if (timerEl.className !== "timer") timerEl.className = "timer";
+                    timerEl.textContent = "Finished";
+                }
+            } else if (elapsed <= maxDuration) {
+                let h = Math.floor(elapsed / 3600000); 
+                let m = Math.floor((elapsed % 3600000) / 60000); 
+                let s = Math.floor((elapsed % 60000) / 1000); 
+                if (timerEl.className !== "timer text-red") timerEl.className = "timer text-red";
+                timerEl.innerHTML = `<div class="dot"></div> Live | Playing ${h}h ${m}m ${s}s`; 
+            } else { 
+                if (elapsed > maxDuration + (2 * 60 * 60 * 1000)) {
+                    card.remove();
+                    renderLiveCategories();
+                    continue;
+                }
+                if (timerEl.className !== "timer") timerEl.className = "timer";
+                timerEl.textContent = "Finished"; 
+            }
+        } else { 
+            let h = Math.floor(diff / 3600000); 
+            let m = Math.floor((diff % 3600000) / 60000); 
+            let s = Math.floor((diff % 60000) / 1000); 
+
+            if (h > 24) {
+                let days = Math.floor(h / 24);
+                let remHours = h % 24;
+                if (timerEl.className !== "timer text-orange") timerEl.className = "timer text-orange";
+                timerEl.textContent = `Start in: ${days}d ${remHours}h`;
+            } else if (h >= 1) {
+                if (timerEl.className !== "timer text-orange") timerEl.className = "timer text-orange";
+                timerEl.textContent = `Start in: ${h}h ${m}m`;
+            } else {
+                if (timerEl.className !== "timer text-green") timerEl.className = "timer text-green";
+                timerEl.textContent = `Start in: ${h}h ${m}m ${s}s`;
+            }
+        } 
+    }
+}
+
+
+function sendData(url) { 
+    if (window.AppInventor) window.AppInventor.setWebViewString(url); 
+    else if (window.CustomWebView) window.CustomWebView.setWebViewString(url); 
+    else window.WebViewString = url; 
+}
+
+// Live events and channels: send the title with the link so the player can show it.
+// Multi-link strings go in "links"; a single link goes in "videoUrl". Playlist> stays plain.
+function sendMedia(title, thumbnail, url) {
+    const raw = String(url || "").trim();
+    if (!raw) return;
+    if (raw.indexOf("Playlist>") !== -1) { sendData(raw); return; }
+    const payload = { title: String(title || "").trim(), thumbnail: String(thumbnail || "").trim() };
+    if (raw.indexOf(",,") !== -1) payload.links = raw;
+    else payload.videoUrl = raw;
+    const output = JSON.stringify(payload);
+    if (window.AppInventor) window.AppInventor.setWebViewString(output);
+    else if (window.CustomWebView) window.CustomWebView.setWebViewString(output);
+    else window.WebViewString = output;
+}
+</script>
+
+
+
+<script>
+"use strict";
+
+const MOVIE_JSON_URLS = [
+  "https://raw.githubusercontent.com/raselmia01733/RasVibe-App-All-Data/refs/heads/main/output_movies_backup.json",
+  "https://raw.githubusercontent.com/raselmia01733/RasVibe-App-All-Data/refs/heads/main/Popular%20movie.json"
+];
+
+// কনফিগারেশন: গ্রিডে প্রতি লাইনে কয়টি কার্ড দেখতে চান
+let gridColumns = 3; 
+
+const grid = document.getElementById("movieGrid");
+const modal = document.getElementById("movieModal");
+const modalBox = document.getElementById("modalBox");
+
+let movies = [];
+let currentView = "grid";
+
+/* BODY SCROLL LOCK */
+
+let savedScrollPosition = 0;
+let bodyScrollLocked = false;
+
+function lockBodyScroll() {
+  if (bodyScrollLocked) return;
+  savedScrollPosition = window.pageYOffset || document.documentElement.scrollTop || 0;
+  bodyScrollLocked = true;
+  document.body.style.position = "fixed";
+  document.body.style.top = "-" + savedScrollPosition + "px";
+  document.body.style.left = "0";
+  document.body.style.right = "0";
+  document.body.style.width = "100%";
+  document.documentElement.style.overflow = "hidden";
+}
+
+function unlockBodyScroll() {
+  if (!bodyScrollLocked) return;
+  bodyScrollLocked = false;
+  document.body.style.position = "";
+  document.body.style.top = "";
+  document.body.style.left = "";
+  document.body.style.right = "";
+  document.body.style.width = "";
+  document.documentElement.style.overflow = "";
+  window.scrollTo(0, savedScrollPosition);
+}
+
+/* NORMALIZE IMAGE URLS WITHOUT DOUBLE-ENCODING EXISTING %XX PATHS */
+function cleanImageUrl(raw) {
+  if (!raw || typeof raw !== "string") return "";
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+  try {
+    const url = new URL(trimmed, document.baseURI);
+    if (!["http:", "https:", "file:", "content:", "data:", "blob:"].includes(url.protocol)) return "";
+    return url.href;
+  } catch (error) {
+    return trimmed.replace(/[\s\u00A0]/g, "%20");
+  }
+}
+
+/* IMAGE LOADER: Fetch -> Blob (method 3), XHR -> Base64 (method 4), then direct URL fallback */
+let movieImageLoadId = 0;
+function loadImageSource(img, src, loadId) {
+  return new Promise((resolve, reject) => {
+    const loaded = () => {
+      if (img._movieImageLoadId !== loadId) return reject(new Error("Image load superseded"));
+      img.style.opacity = "1";
+      resolve();
+    };
+    const failed = () => reject(new Error("Image decode failed"));
+    img.addEventListener("load", loaded, { once: true });
+    img.addEventListener("error", failed, { once: true });
+    img.src = src;
+  });
+}
+
+function fetchImageBlob(url) {
+  const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const timeout = controller ? setTimeout(() => controller.abort(), 12000) : null;
+  return fetch(url, controller ? { signal: controller.signal } : {})
+    .then(response => {
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      return response.blob();
+    })
+    .then(blob => {
+      if (!blob || !blob.size) throw new Error("Empty image response");
+      return blob;
+    })
+    .finally(() => { if (timeout) clearTimeout(timeout); });
+}
+
+function xhrImageDataUrl(url) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.responseType = "blob";
+    xhr.timeout = 12000;
+    xhr.onload = () => {
+      if (xhr.status < 200 || xhr.status >= 300 || !xhr.response || !xhr.response.size) {
+        reject(new Error("XHR HTTP " + xhr.status));
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error("Image data read failed"));
+      reader.readAsDataURL(xhr.response);
+    };
+    xhr.onerror = () => reject(new Error("XHR network/CORS error"));
+    xhr.ontimeout = () => reject(new Error("XHR timeout"));
+    xhr.send();
+  });
+}
+
+async function loadMovieImage(img, rawUrl) {
+  const url = cleanImageUrl(rawUrl);
+  const loadId = ++movieImageLoadId;
+  img._movieImageLoadId = loadId;
+  img.style.opacity = "0";
+  if (!url) return;
+
+  let blobUrl = "";
+  try {
+    // Method 3: fetch the image as a Blob.
+    const blob = await fetchImageBlob(url);
+    if (img._movieImageLoadId !== loadId) return;
+    blobUrl = URL.createObjectURL(blob);
+    await loadImageSource(img, blobUrl, loadId);
+    return;
+  } catch (fetchError) {
+    if (blobUrl) URL.revokeObjectURL(blobUrl);
+  }
+
+  try {
+    // Method 4: XHR + FileReader creates a MIME-aware Base64 data URL.
+    const dataUrl = await xhrImageDataUrl(url);
+    if (img._movieImageLoadId !== loadId) return;
+    await loadImageSource(img, dataUrl, loadId);
+    return;
+  } catch (xhrError) {
+    // Direct <img> is a useful final fallback when the host blocks CORS requests.
+  }
+
+  try {
+    if (img._movieImageLoadId === loadId) await loadImageSource(img, url, loadId);
+  } catch (directError) {
+    if (img._movieImageLoadId === loadId) img.style.opacity = "0";
+  }
+}
+
+const movieImageObserver = "IntersectionObserver" in window
+  ? new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        movieImageObserver.unobserve(entry.target);
+        const image = entry.target;
+        loadMovieImage(image, image.dataset.movieImageUrl);
+      });
+    }, { rootMargin: "300px 0px" })
+  : null;
+
+function queueMovieImage(img, rawUrl) {
+  img.dataset.movieImageUrl = rawUrl || "";
+  if (movieImageObserver) movieImageObserver.observe(img);
+  else loadMovieImage(img, rawUrl);
+}
+
+/* PARSE SOURCE UPLOAD DATES (both current lists use different date formats) */
+function parseMovieTimestamp(value) {
+  const text = String(value || "").trim();
+  if (!text) return 0;
+
+  const monthNumbers = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+  let match = text.match(/^(\d{1,2})-([a-z]{3})-(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})\s*(am|pm)$/i);
+  if (match) {
+    const month = monthNumbers[match[2].toLowerCase()];
+    let hour = Number(match[4]) % 12;
+    if (match[7].toLowerCase() === "pm") hour += 12;
+    const time = Date.UTC(Number(match[3]), month, Number(match[1]), hour, Number(match[5]), Number(match[6]));
+    return month === undefined ? 0 : time;
+  }
+
+  match = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})\s*(am|pm)$/i);
+  if (match) {
+    let hour = Number(match[4]) % 12;
+    if (match[7].toLowerCase() === "pm") hour += 12;
+    return Date.UTC(Number(match[3]), Number(match[1]) - 1, Number(match[2]), hour, Number(match[5]), Number(match[6]));
+  }
+
+  const parsed = Date.parse(text);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+/* LOAD AND MERGE MOVIE JSON SOURCES */
+async function loadMovies() {
+  try {
+    const sourceResults = await Promise.all(MOVIE_JSON_URLS.map(async (url, sourceIndex) => {
+      try {
+        const response = await fetch(url, { cache: "no-store" });
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        const data = await response.json();
+        if (!Array.isArray(data)) throw new Error("Invalid JSON format");
+        return { data, sourceIndex, url };
+      } catch (error) {
+        return { error, sourceIndex, url };
+      }
+    }));
+
+    const validSources = sourceResults.filter(result => Array.isArray(result.data));
+    sourceResults.filter(result => result.error).forEach(result => {
+      console.warn("Movie source unavailable:", result.url, result.error);
+    });
+    if (!validSources.length) throw new Error("All movie sources failed to load");
+
+    const combined = [];
+    validSources.forEach(source => {
+      source.data.forEach(item => {
+        if (!item || typeof item.title !== "string" || typeof item.img !== "string" || typeof item.link !== "string") return;
+        const movie = Object.assign({}, item);
+        movie.img = cleanImageUrl(movie.img);
+        movie._uploadedAt = parseMovieTimestamp(movie.date);
+        movie._sourceIndex = source.sourceIndex;
+        combined.push(movie);
+      });
+    });
+
+    movies = combined;
+    movies.sort((a, b) => (b._uploadedAt - a._uploadedAt) || (a._sourceIndex - b._sourceIndex));
+
+    allMovieItems = movies.slice();
+    const movieCount = document.getElementById("movieCount");
+    if (movieCount) movieCount.textContent = String(allMovieItems.length);
+    allMovieItems.forEach(m => {
+      m._k = (m.title + " " + (m.details || "")).toLowerCase();
+    });
+    renderMovies();
+    hideLoader();
+  } catch(error) {
+    grid.innerHTML = '<div class="empty">Unable to load movies.<br>Check your internet connection.</div>';
+    console.error("Movie loading error:", error);
+    hideLoader();
+  }
+}
+
+/* MULTI-LINK PARSER */
+
+function parseVideoLinks(raw) {
+  if (!raw || typeof raw !== "string") return [];
+  const input = raw.trim();
+  if (!input) return [];
+
+  const results = [];
+  const parts = input.split(/\s*,\s*\)\s*/);
+
+  parts.forEach((part, index) => {
+    part = part.trim();
+    if (!part) return;
+    const separator = part.indexOf(",,");
+
+    if (separator !== -1) {
+      const label = part.substring(0, separator).trim();
+      const url = part.substring(separator + 2).trim();
+      if (/^https?:\/\//i.test(url)) {
+        results.push({ label: label || ("Watch " + (index + 1)), rawUrl: url });
+      }
+    } else {
+      if (/^https?:\/\//i.test(part)) {
+        results.push({ label: "Watch Now", rawUrl: part });
+      }
+    }
+  });
+
+  if (results.length === 0 && /^https?:\/\//i.test(input)) {
+    results.push({ label: "Watch Now", rawUrl: input });
+  }
+  return results;
+}
+
+/* EXTRACT VIDEO URL */
+
+function parseVideoURL(raw) {
+  const parts = String(raw || "").split("|").map(p => p.trim()).filter(Boolean);
+  const videoUrl = parts[0] || "";
+  // Keep every header (Referer, Cookie, ...) after the URL, joined with & as the player reads them
+  const headers = parts.slice(1).join("&");
+  return { videoUrl: headers ? videoUrl + "|" + headers : videoUrl };
+}
+
+/* APPLY VIEW */
+
+function applyView() {
+  if (currentView === "grid") {
+    grid.classList.remove("list-view");
+    grid.style.setProperty("--columns", gridColumns);
+    document.documentElement.style.setProperty("--columns", gridColumns);
+  } else {
+    grid.classList.add("list-view");
+  }
+}
+
+/* RENDER MOVIES */
+
+let allMovieItems = [];
+
+// Called by filterMatches() whenever the app search box changes
+function applyMovieSearch(input) {
+  const q = (input || "").toLowerCase().trim();
+  movies = q
+    ? allMovieItems.filter(m => m._k.includes(q))
+    : allMovieItems.slice();
+  renderMovies();
+};
+
+const MOVIE_PAGE_SIZE = 50;
+let renderedMovieCount = 0;
+const movieLoadMore = document.getElementById("movieLoadMore");
+const movieLoadMoreBtn = document.getElementById("movieLoadMoreBtn");
+const movieSentinel = document.getElementById("movieSentinel");
+
+function buildMovieCard(movie, originalIndex) {
+  const links = parseVideoLinks(movie.link);
+
+  const card = document.createElement("div");
+  card.className = "movie-card";
+
+  const poster = document.createElement("div");
+  poster.className = "poster";
+
+  const img = document.createElement("img");
+  img.alt = movie.title;
+  img.loading = "lazy";
+  img.style.opacity = "0";
+  queueMovieImage(img, movie.img);
+
+  const overlay = document.createElement("div");
+  overlay.className = "poster-overlay";
+
+  const play = document.createElement("div");
+  play.className = "play-icon";
+  play.textContent = "▶";
+
+  const tag = document.createElement("div");
+  tag.className = "quality-tag";
+  tag.textContent = links.length > 1 ? links.length + " OPTIONS" : "PLAY";
+
+  poster.append(img, overlay, play, tag);
+
+  const info = document.createElement("div");
+  info.className = "movie-info";
+
+  const title = document.createElement("div");
+  title.className = "movie-title";
+  title.textContent = movie.title;
+
+  const desc = document.createElement("div");
+  desc.className = "movie-desc";
+  desc.textContent = movie.details || "";
+
+  const date = document.createElement("div");
+  date.className = "movie-date";
+  date.textContent = movie.date || "Popular";
+
+  info.append(title, desc, date);
+  card.append(poster, info);
+
+  card.addEventListener("click", () => {
+    openMovie(originalIndex);
+  });
+
+  return card;
+}
+
+function updateMovieLoadMore() {
+  movieLoadMore.style.display = renderedMovieCount < movies.length ? "block" : "none";
+}
+
+// Renders the next 50 movies only, so the page never builds thousands of cards at once
+function appendMoviePage() {
+  const end = Math.min(renderedMovieCount + MOVIE_PAGE_SIZE, movies.length);
+  if (end <= renderedMovieCount) {
+    updateMovieLoadMore();
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  for (let i = renderedMovieCount; i < end; i++) {
+    fragment.appendChild(buildMovieCard(movies[i], i));
+  }
+
+  grid.appendChild(fragment);
+  renderedMovieCount = end;
+  applyView();
+  updateMovieLoadMore();
+}
+
+function renderMovies() {
+  renderedMovieCount = 0;
+
+  if (!movies.length) {
+    grid.innerHTML = '<div class="empty">No movies found.</div>';
+    movieLoadMore.style.display = "none";
+    return;
+  }
+
+  grid.innerHTML = "";
+  appendMoviePage();
+}
+
+movieLoadMoreBtn.addEventListener("click", appendMoviePage);
+
+if ("IntersectionObserver" in window) {
+  const movieObserver = new IntersectionObserver(entries => {
+    if (entries.some(e => e.isIntersecting) && renderedMovieCount < movies.length) {
+      appendMoviePage();
+    }
+  }, { rootMargin: "300px 0px" });
+  movieObserver.observe(movieSentinel);
+}
+
+/* GRID BUTTON */
+
+document.getElementById("gridBtn").addEventListener("click", function() {
+  currentView = "grid";
+  this.classList.add("active");
+  document.getElementById("listBtn").classList.remove("active");
+  applyView();
+});
+
+/* LIST BUTTON */
+
+document.getElementById("listBtn").addEventListener("click", function() {
+  currentView = "list";
+  this.classList.add("active");
+  document.getElementById("gridBtn").classList.remove("active");
+  applyView();
+});
+
+/* OPEN MOVIE */
+
+function openMovie(index) {
+  const movie = movies[index];
+  if (!movie) return;
+
+  const links = parseVideoLinks(movie.link);
+
+  const detailPoster = document.getElementById("detailPoster");
+  detailPoster.alt = movie.title;
+  loadMovieImage(detailPoster, movie.img);
+  document.getElementById("detailTitle").textContent = movie.title;
+  document.getElementById("detailDate").textContent = movie.date || "";
+  document.getElementById("detailLinkCount").textContent = links.length + " Available Option(s)";
+  document.getElementById("detailDescription").textContent = movie.details || "No additional information available.";
+
+  const options = document.getElementById("videoOptions");
+  options.innerHTML = "";
+
+  links.forEach((link) => {
+    const button = document.createElement("button");
+    button.className = "video-option";
+
+    const name = document.createElement("span");
+    name.textContent = link.label;
+
+    const action = document.createElement("span");
+    action.textContent = "WATCH ▶";
+
+    button.append(name, action);
+    button.addEventListener("click", () => {
+      selectMovie(movie, link);
+    });
+    options.appendChild(button);
+  });
+
+  if (!links.length) {
+    options.textContent = "No valid video links available.";
+  }
+
+  modal.classList.add("show");
+  lockBodyScroll();
+  modalBox.scrollTop = 0;
+}
+
+/* SEND SELECTED VIDEO TO ANDROID */
+
+function selectMovie(movie, selectedLink) {
+  const parsed = parseVideoURL(selectedLink.rawUrl);
+  const selectedLabel = String(selectedLink.label || "").trim();
+  const finalTitle = selectedLabel && selectedLabel !== "Watch Now"
+    ? (movie.title || "") + " - " + selectedLabel
+    : (movie.title || "");
+
+  const payload = {
+    title: finalTitle,
+    thumbnail: cleanImageUrl(movie.img),
+    videoUrl: parsed.videoUrl
+  };
+
+  const output = JSON.stringify(payload);
+
+  try {
+    if (window.AppInventor && typeof window.AppInventor.setWebViewString === "function") {
+      window.AppInventor.setWebViewString(output);
+    }
+  } catch(error) {
+    console.error("Android bridge error:", error);
+  }
+
+  window.dispatchEvent(new CustomEvent("movieSelected", { detail: payload }));
+  window.lastSelectedMovie = payload;
+  closeModal();
+}
+
+/* CLOSE MODAL */
+
+function closeModal() {
+  modal.classList.remove("show");
+  unlockBodyScroll();
+}
+
+document.getElementById("closeModal").addEventListener("click", closeModal);
+
+modal.addEventListener("click", function(event) {
+  if (event.target === modal) {
+    closeModal();
+  }
+});
+
+/* PREVENT BACKGROUND TOUCH SCROLL */
+
+modal.addEventListener("touchmove", function(event) {
+  if (!modalBox.contains(event.target)) {
+    event.preventDefault();
+  }
+}, { passive: false });
+
+/* ESCAPE KEY */
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") {
+    closeModal();
+  }
+});
+
+/* START */
+
+loadMovies();
+
+/* EXTERNAL API */
+
+window.MovieHub = {
+  reload: loadMovies,
+  getMovies: () => movies,
+  getSelectedMovie: () => window.lastSelectedMovie || null,
+  getVideoLinks: (index) => movies[index] ? parseVideoLinks(movies[index].link) : []
+};
+
+</script>
+<script>
+/* ===== LIVE TV CHANNELS (new) =====
+   Runs in its own block and its own scope, so nothing here can stop
+   the page loader or the other sections if a logo or link is bad. */
+(function () {
+    "use strict";
+    try {
+        var LTV_CHANNELS = [
+ {
+  "title": "Willow HD",
+  "logo": "https://mgpindia.com/wp-content/uploads/2021/10/willow-logo.jpg",
+  "link": "https://tvsen7.aynaott.com/Sports1/index.m3u8"
+ },
+ {
+  "title": "T Sports",
+  "logo": "https://www.tsports.com.bd/assets/upload/cover/cover_1606127688.jpg",
+  "link": "https://playztv-apps.pages.dev/ptv-sports/index.m3u8"
+ },
+ {
+  "title": "A Sports",
+  "logo": "https://thumb.wikimedia.org/wikipedia/en/thumb/0/0c/A_Sports_Logo.png/250px-A_Sports_Logo.png",
+  "link": "https://playztv-apps.pages.dev/a-sports/index.m3u8"
+ },
+ {
+  "title": "Willow HD 2",
+  "logo": "http://103.203.93.6/Kollywood%20(Tamil)/2014/Thegidi%20%202014%20%201CD%20%20MSK%20%20Xvid/4qgRM6XOk0cNVdeeNAHLbjhKdJ3.jpg",
+  "link": "https://playztv-apps.pages.dev/unite8-sports-2/index.m3u8"
+ },
+ {
+  "title": "Ananda TV",
+  "logo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Logo_of_Ananda_TV.svg/250px-Logo_of_Ananda_TV.svg.png",
+  "link": "https://playztv-apps.pages.dev/ananda-tv/index.m3u8"
+ },
+ {
+  "title": "Asian TV",
+  "logo": "https://thumb.wikimedia.org/wikipedia/en/thumb/f/fb/Asian_TV_Logo.svg/120px-Asian_TV_Logo.svg.png",
+  "link": "https://playztv-apps.pages.dev/asian-tv/index.m3u8"
+ },
+ {
+  "title": "ATN Bangla",
+  "logo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/95/ATN_Bangla_Logo_without_slogan.svg/250px-ATN_Bangla_Logo_without_slogan.svg.png",
+  "link": "https://playztv-apps.pages.dev/atn-bangla/index.m3u8"
+ },
+ {
+  "title": "ATN News",
+  "logo": "https://thumb.wikimedia.org/wikipedia/en/thumb/1/18/ATN_News_Logo_without_slogan.svg/250px-ATN_News_Logo_without_slogan.svg.png",
+  "link": "https://playztv-apps.pages.dev/atn-news/index.m3u8"
+ },
+ {
+  "title": "Bijoy TV",
+  "logo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/10/Logo_of_Bijoy_TV.svg/250px-Logo_of_Bijoy_TV.svg.png",
+  "link": "https://playztv-apps.pages.dev/bijoy-tv/index.m3u8"
+ },
+ {
+  "title": "Boishakhi TV",
+  "logo": "https://thumb.wikimedia.org/wikipedia/en/thumb/c/c7/Boishakhi_TV_logo.svg/500px-Boishakhi_TV_logo.svg.png",
+  "link": "https://playztv-apps.pages.dev/boishakhi-tv/index.m3u8"
+ },
+ {
+  "title": "BTV World",
+  "logo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/49/%E0%A6%AC%E0%A6%BF%E0%A6%9F%E0%A6%BF%E0%A6%AD%E0%A6%BF_%E0%A6%93%E0%A6%AF%E0%A6%BC%E0%A6%BE%E0%A6%B0%E0%A7%8D%E0%A6%B2%E0%A7%8D%E0%A6%A1_%E0%A6%B2%E0%A7%8B%E0%A6%97%E0%A7%8B.svg/250px-%E0%A6%AC%E0%A6%BF%E0%A6%9F%E0%A6%BF%E0%A6%AD%E0%A6%BF_%E0%A6%93%E0%A6%AF%E0%A6%BC%E0%A6%BE%E0%A6%B0%E0%A7%8D%E0%A6%B2%E0%A7%8D%E0%A6%A1_%E0%A6%B2%E0%A7%8B%E0%A6%97%E0%A7%8B.svg.png",
+  "link": "https://playztv-apps.pages.dev/btv-world/index.m3u8"
+ },
+ {
+  "title": "BTV",
+  "logo": "https://thumb.wikimedia.org/wikipedia/en/thumb/0/02/Bangladesh_Television_Logo.svg/250px-Bangladesh_Television_Logo.svg.png",
+  "link": "https://playztv-apps.pages.dev/btv/index.m3u8"
+ },
+ {
+  "title": "Channel 9",
+  "logo": "https://thumb.wikimedia.org/wikipedia/en/thumb/f/ff/Channel9_bd.svg/250px-Channel9_bd.svg.png",
+  "link": "https://playztv-apps.pages.dev/channel-9/index.m3u8"
+ },
+ {
+  "title": "Channel i",
+  "logo": "https://thumb.wikimedia.org/wikipedia/en/thumb/8/88/Channel-i.svg/250px-Channel-i.svg.png",
+  "link": "https://playztv-apps.pages.dev/channel-i/index.m3u8"
+ },
+ {
+  "title": "DBC News",
+  "logo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/93/%E0%A6%A1%E0%A6%BF%E0%A6%AC%E0%A6%BF%E0%A6%B8%E0%A6%BF_%E0%A6%A8%E0%A6%BF%E0%A6%89%E0%A6%9C%E2%80%93%E0%A6%8F%E0%A6%B0_%E0%A6%B2%E0%A7%8B%E0%A6%97%E0%A7%8B.svg/250px-%E0%A6%A1%E0%A6%BF%E0%A6%AC%E0%A6%BF%E0%A6%B8%E0%A6%BF_%E0%A6%A8%E0%A6%BF%E0%A6%89%E0%A6%9C%E2%80%93%E0%A6%8F%E0%A6%B0_%E0%A6%B2%E0%A7%8B%E0%A6%97%E0%A7%8B.svg.png",
+  "link": "https://playztv-apps.pages.dev/dbc-news/index.m3u8"
+ },
+ {
+  "title": "Desh TV",
+  "logo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ee/Logo_of_Desh_TV.svg/250px-Logo_of_Desh_TV.svg.png",
+  "link": "https://playztv-apps.pages.dev/desh-tv/index.m3u8"
+ },
+ {
+  "title": "Duronto TV",
+  "logo": "https://upload.wikimedia.org/wikipedia/en/d/d7/Duronto_TV_Logo.png",
+  "link": "https://playztv-apps.pages.dev/duronto-tv/index.m3u8"
+ },
+ {
+  "title": "Ekattor TV",
+  "logo": "https://thumb.wikimedia.org/wikipedia/en/thumb/5/57/Ekattor_TV_logo.svg/250px-Ekattor_TV_logo.svg.png",
+  "link": "https://playztv-apps.pages.dev/ekattor-tv/index.m3u8"
+ },
+ {
+  "title": "Gazi TV",
+  "logo": "https://thumb.wikimedia.org/wikipedia/en/thumb/f/f1/Logo_of_GTV_%28Bangladesh%29.svg/250px-Logo_of_GTV_%28Bangladesh%29.svg.png",
+  "link": "https://playztv-apps.pages.dev/gazi_tv/index.m3u8"
+ },
+ {
+  "title": "Jamuna TV",
+  "logo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fe/Jamuna_TV_logo.svg/500px-Jamuna_TV_logo.svg.png",
+  "link": "https://playztv-apps.pages.dev/jamuna-tv/index.m3u8"
+ },
+ {
+  "title": "Maasranga TV",
+  "logo": "https://upload.wikimedia.org/wikipedia/en/3/39/Maasranga_Television_Logo.jpg",
+  "link": "https://playztv-apps.pages.dev/maasranga-tv/index.m3u8"
+ },
+ {
+  "title": "My TV",
+  "logo": "https://thumb.wikimedia.org/wikipedia/en/thumb/8/8b/Logo_of_My_TV_%28Bangladesh%29.svg/330px-Logo_of_My_TV_%28Bangladesh%29.svg.png",
+  "link": "https://playztv-apps.pages.dev/my-tv/index.m3u8"
+ },
+ {
+  "title": "NTV",
+  "logo": "https://thumb.wikimedia.org/wikipedia/en/thumb/e/ef/NTV_%28Bangladesh%29_logo.svg/250px-NTV_%28Bangladesh%29_logo.svg.png",
+  "link": "https://playztv-apps.pages.dev/ntv/index.m3u8"
+ },
+ {
+  "title": "Zee Bangla",
+  "logo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/%E0%A6%9C%E0%A6%BF_%E0%A6%AC%E0%A6%BE%E0%A6%82%E0%A6%B2%E0%A6%BE_%E0%A7%A8%E0%A7%A6%E0%A7%A8%E0%A7%AB.svg/250px-%E0%A6%9C%E0%A6%BF_%E0%A6%AC%E0%A6%BE%E0%A6%82%E0%A6%B2%E0%A6%BE_%E0%A7%A8%E0%A7%A6%E0%A7%A8%E0%A7%AB.svg.png",
+  "link": "https://playztv-apps.pages.dev/zee-bangla/index.m3u8"
+ }
+];
+
+        var LTV_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect x='6' y='10' width='28' height='19' rx='3' fill='none' stroke='%2310b981' stroke-width='2.5'/%3E%3Cpath d='M15 33h10M16 5l4 5 4-5' stroke='%2310b981' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E";
+
+        function ltvBuildCard(ch) {
+            var card = document.createElement("div");
+            card.className = "ltv-card";
+            card.setAttribute("role", "button");
+            card.setAttribute("aria-label", ch.title || "Live TV");
+
+            var img = document.createElement("img");
+            img.alt = "";
+            img.loading = "lazy";
+            img.decoding = "async";
+            img.referrerPolicy = "no-referrer";
+            img.onerror = function () {
+                this.onerror = null;
+                this.className = "ltv-fallback";
+                this.src = LTV_FALLBACK;
+            };
+            img.src = ch.logo || LTV_FALLBACK;
+            card.appendChild(img);
+
+            card.addEventListener("click", function () {
+                if (typeof sendMedia === "function") { sendMedia(ch.title || "", "", ch.link || ""); return; }
+                // Same output as sendMedia, used only if the first script could not run
+                var out = JSON.stringify({ title: String(ch.title || "").trim(), thumbnail: "", videoUrl: String(ch.link || "").trim() });
+                if (window.AppInventor) window.AppInventor.setWebViewString(out);
+                else if (window.CustomWebView) window.CustomWebView.setWebViewString(out);
+                else window.WebViewString = out;
+            });
+            return card;
+        }
+
+        function ltvRender() {
+            var box = document.getElementById("ltvSliderContainer");
+            if (!box || box.getAttribute("data-ready") === "1") return;
+            var frag = document.createDocumentFragment();
+            for (var i = 0; i < LTV_CHANNELS.length; i++) {
+                if (LTV_CHANNELS[i] && LTV_CHANNELS[i].link) frag.appendChild(ltvBuildCard(LTV_CHANNELS[i]));
+            }
+            box.appendChild(frag);
+            box.setAttribute("data-ready", "1");
+        }
+
+        ltvRender();
+
+        // Hide this row during search, the same way the other rows hide.
+        var ltvOriginalFilter = window.filterMatches;
+        if (typeof ltvOriginalFilter === "function") {
+            window.filterMatches = function (input) {
+                var result = ltvOriginalFilter.apply(this, arguments);
+                try {
+                    var wrap = document.getElementById("ltvWrapper");
+                    var q = input ? String(input).toLowerCase().trim() : "";
+                    if (wrap) wrap.style.display = q !== "" ? "none" : "block";
+                } catch (e) {}
+                return result;
+            };
+        }
+    } catch (err) {
+        console.log("Live TV channels error:", err);
+    }
+})();
+
+/* ===== LOADER SAFETY (new, does not edit the original code) =====
+   The original start-up code (1.5s loader hide, live events, auto events,
+   timers) waits for DOMContentLoaded. Some app viewers insert the page after
+   that event has already happened, so it never fires and the loader stays.
+   In a normal page load this script runs while the page is still "loading",
+   so nothing below changes anything. */
+(function () {
+    try {
+        if (document.readyState !== "loading" && !window.__ltvStartFired) {
+            window.__ltvStartFired = true;
+            var ev;
+            try { ev = new Event("DOMContentLoaded", { bubbles: true }); }
+            catch (e) { ev = document.createEvent("Event"); ev.initEvent("DOMContentLoaded", true, false); }
+            document.dispatchEvent(ev);
+        }
+    } catch (e) {}
+
+    // Last resort: if the loader is still covering the page, hide it the same way hideLoader() does.
+    setTimeout(function () {
+        try {
+            var loader = document.getElementById("loader-container");
+            if (loader && loader.style.display !== "none") {
+                if (typeof hideLoader === "function") hideLoader();
+                else loader.style.display = "none";
+            }
+        } catch (e) {}
+    }, 2500);
+})();
+</script>
+</body> 
+</html>
+    

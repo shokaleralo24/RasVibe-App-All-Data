@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Summit Shift Schedule</title>
+<style>
+
+*{box-sizing:border-box}
+
+body{
+ margin:0;padding:8px;background:#f1f5f9;color:#172033;
+ font-family:Arial,sans-serif
+}
+
+.page{width:100%;max-width:1200px;margin:auto}
+
+.header{
+ background:linear-gradient(135deg,#102f50,#245b85);
+ color:white;text-align:center;padding:18px 8px;border-radius:14px;
+ box-shadow:0 4px 12px #173f6820
+}
+
+.company{font-size:clamp(9.6px,1.8vw,14.4px);font-weight:800}
+.subtitle{font-size:7.2px;margin-top:6px;color:#dceafa}
+
+.ship-section{margin-top:14px}
+
+.ship-head{
+ display:flex;align-items:center;justify-content:space-between;
+ gap:5px;padding:0 12px;margin-bottom:8px
+}
+
+.ship-head h2{
+ font-size:7.8px;margin:0;color:#19385e;white-space:nowrap
+}
+
+.ship-nav{display:flex;gap:5px}
+
+.ship-nav button{
+ width:30px;height:29px;border:0;border-radius:9px;
+ background:#193f66;color:white;font-size:11.4px;cursor:pointer;
+ display:inline-flex;align-items:center;justify-content:center
+}
+
+.ship-view{
+ overflow-x:auto;scrollbar-width:none;scroll-behavior:smooth;
+ scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch
+}
+
+.ship-view::-webkit-scrollbar{display:none}
+
+.ship-track{
+ display:flex;gap:9px;width:max-content;padding:6px 12px 12px
+}
+
+.ship-card{
+ position:relative;isolation:isolate;overflow:hidden;flex:0 0 190px;
+ height:52px;padding:7px 12px;border:0;border-radius:14px;
+ color:white;text-align:left;scroll-snap-align:start;
+ box-shadow:0 5px 12px #16345420,inset 0 2px 1px #ffffff35;
+ cursor:pointer
+}
+
+.ship-card:before,.ship-card:after{
+ content:"";position:absolute;z-index:-1;border-radius:50%;
+ background:#ffffff22;pointer-events:none
+}
+
+.ship-card:before{
+ width:100px;height:100px;right:-35px;bottom:-65px;
+ box-shadow:-25px -12px 0 -15px #ffffff18
+}
+
+.ship-card:after{width:45px;height:45px;right:20px;top:-28px}
+
+.ship-card:nth-child(6n+1){background:linear-gradient(135deg,#2e6af0,#2044b4)}
+.ship-card:nth-child(6n+2){background:linear-gradient(135deg,#07996f,#047451)}
+.ship-card:nth-child(6n+3){background:linear-gradient(135deg,#f07819,#c94308)}
+.ship-card:nth-child(6n+4){background:linear-gradient(135deg,#7849e8,#4a25ac)}
+.ship-card:nth-child(6n+5){background:linear-gradient(135deg,#078caa,#075b83)}
+.ship-card:nth-child(6n){background:linear-gradient(135deg,#d34b79,#96234d)}
+
+.ship-num{
+ display:block;font-size:4.2px;letter-spacing:.8px;font-weight:800;
+ margin-bottom:4px;color:#ffffffd5
+}
+
+.ship-name{
+ display:block;font-size:6.6px;font-weight:800;line-height:1.1;
+ overflow-wrap:anywhere
+}
+
+.ship-dots{
+ display:flex;justify-content:center;gap:5px;padding:0 12px;margin:0 0 8px
+}
+
+.ship-dot{
+ width:6px;height:6px;flex:0 0 6px;padding:0;border:0;
+ border-radius:9px;background:#cbd5e1
+}
+
+.ship-dot.active{width:22px;flex-basis:22px;background:#193f66}
+
+.cards-heading{
+ display:flex;align-items:center;justify-content:space-between;
+ margin:16px 2px 8px
+}
+
+.cards-heading h2{font-size:10.2px;margin:0;color:#173f68}
+.nav{display:flex;gap:6px}
+
+.nav button{
+ width:30px;height:30px;border:0;border-radius:8px;
+ background:#173f68;color:white;font-size:12px;cursor:pointer
+}
+
+.cards-viewport{
+ overflow-x:auto;scrollbar-width:none;scroll-behavior:smooth
+}
+
+.cards-viewport::-webkit-scrollbar{display:none}
+
+.cards-track{display:flex;gap:10px;padding:2px 1px 9px}
+
+.shift-card{
+ position:relative;overflow:hidden;flex:0 0 28%;min-width:200px;
+ max-width:260px;min-height:125px;padding:12px;color:#fff;
+ border-radius:13px;box-shadow:0 4px 12px #00000025;
+ transition:background .2s,color .2s
+}
+
+.shift-card:nth-child(1){background:#2563eb;color:#fff}
+.shift-card:nth-child(2){background:#c76a08;color:#fff}
+.shift-card:nth-child(3){background:#15803d;color:#fff}
+.shift-card:nth-child(4){background:#7e22ce;color:#fff}
+
+.shift-card:after{
+ content:"";position:absolute;width:90px;height:90px;right:-30px;
+ bottom:-40px;border-radius:50%;background:#ffffff20;pointer-events:none
+}
+
+.card-title{
+ position:relative;z-index:1;font-size:6.6px;font-weight:800;
+ letter-spacing:.6px;text-transform:uppercase;color:inherit
+}
+
+.card-team{
+ position:relative;z-index:1;display:flex;flex-wrap:nowrap;
+ align-items:center;gap:4px;margin-top:12px;overflow-x:auto;
+ scrollbar-width:none;white-space:nowrap;color:inherit
+}
+
+.card-team::-webkit-scrollbar{display:none}
+
+.member-chip{
+ display:inline-flex;align-items:center;flex:0 0 auto;max-width:none;
+ padding:5px 6px;border:1px solid #ffffff55;border-radius:7px;
+ background:#00000020;color:#fff;font-size:6px;font-weight:800;
+ line-height:1.2;white-space:nowrap
+}
+
+.card-time{
+ position:relative;z-index:1;font-size:6.6px;margin-top:10px;
+ color:inherit;line-height:1.5
+}
+
+.card-countdown{
+ position:relative;z-index:1;display:inline-flex;align-items:center;
+ gap:6px;max-width:100%;margin-top:9px;padding:6px 10px;
+ border:1px solid #ffffff65;border-radius:20px;background:#00000020;
+ color:#fff;box-shadow:inset 0 1px 2px #ffffff15;
+ font-size:6.6px;font-weight:800;line-height:1.3;overflow-wrap:anywhere
+}
+
+.running-shift-label{
+ position:absolute;z-index:2;top:9px;right:10px;padding:5px 10px;
+ border:1px solid #ffffff65;border-radius:20px;background:#00000020;
+ color:#fff;font-size:6.6px;font-weight:800;line-height:1.3;
+ white-space:nowrap
+}
+
+.card-dots{display:flex;justify-content:center;gap:6px;margin:0 0 15px}
+.card-dots span{width:7px;height:7px;border-radius:8px;background:#cbd5e1}
+.card-dots span.active{width:20px;background:#173f68}
+
+.schedule-wrap{
+ position:relative;isolation:isolate;width:100%;margin:16px 0 0;
+ padding:0 5px 5px;overflow:hidden;border:1px solid rgba(197,150,45,.58);
+ border-radius:15px;
+ background:linear-gradient(135deg,rgba(255,248,225,.97),rgba(245,215,142,.38),rgba(255,253,245,.97));
+ box-shadow:0 6px 19px rgba(168,124,31,.16),inset 0 1px 0 rgba(255,255,255,.9)
+}
+
+.schedule-controls{
+ position:relative;isolation:isolate;overflow:hidden;display:flex;
+ align-items:center;justify-content:space-between;gap:10px;
+ width:calc(100% + 10px);margin:0 -5px;padding:14px;border:0;
+ border-bottom:1px solid rgba(255,255,255,.22);
+ border-radius:14px 14px 0 0;
+ background:linear-gradient(135deg,#14532d 0%,#15803d 48%,#16a34a 100%);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 -3px 8px rgba(0,0,0,.10)
+}
+
+.schedule-controls:before{
+ content:"";position:absolute;z-index:-1;width:125px;height:125px;
+ right:-35px;bottom:-72px;border-radius:50%;
+ background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.12);
+ box-shadow:0 0 0 14px rgba(255,255,255,.045),0 0 0 29px rgba(255,255,255,.025);
+ pointer-events:none
+}
+
+.schedule-controls:after{
+ content:"";position:absolute;z-index:-1;width:65px;height:65px;
+ left:38%;top:-42px;border-radius:50%;
+ background:rgba(255,255,255,.07);pointer-events:none
+}
+
+.schedule-controls-title{
+ flex:1 1 auto;min-width:0;color:#fff;
+ font-size:clamp(8.4px,2.1vw,12px);font-weight:800;line-height:1.25;
+ text-shadow:0 2px 4px rgba(0,0,0,.2)
+}
+
+.spinners{
+ display:flex;align-items:center;justify-content:flex-end;gap:7px;
+ flex-wrap:nowrap;flex:0 0 auto
+}
+
+.schedule-controls select{
+ width:auto;max-width:48%;min-width:0;padding:10px 9px;
+ border:1px solid rgba(255,255,255,.55);border-radius:10px;
+ background:rgba(255,255,255,.96);color:#14532d;font-size:7.8px;
+ font-weight:800;box-shadow:0 3px 8px rgba(0,0,0,.13),inset 0 1px 0 #fff
+}
+
+.schedule-heading{display:none}
+.table-scroll{width:100%;overflow:visible}
+
+table{
+ width:100%;min-width:0;table-layout:fixed;border-collapse:collapse
+}
+
+th,td{
+ border:1px solid rgba(184,145,58,.38);text-align:center;
+ vertical-align:middle;padding:6px 2px;font-size:clamp(4.8px,1.5vw,7.2px);
+ overflow-wrap:normal;word-break:keep-all;white-space:nowrap
+}
+
+th{background:#173f68;color:white;font-weight:800;line-height:1.3}
+td{background:rgba(255,250,235,.68)}
+
+th:first-child,td:first-child{width:14%}
+
+th:nth-child(2),td:nth-child(2),
+th:nth-child(3),td:nth-child(3),
+th:nth-child(4),td:nth-child(4){width:19%}
+
+th:last-child,td:last-child{width:29%}
+
+.date-cell{font-weight:800;color:#66501c;white-space:nowrap}
+.friday{color:#16803c!important}
+
+.team{
+ display:block;width:100%;padding:6px 2px;border-radius:7px;
+ font-weight:800;font-size:clamp(4.8px,1.38vw,6.6px);
+ line-height:1.25;white-space:nowrap;overflow-wrap:normal;
+ word-break:keep-all;overflow:hidden;text-overflow:clip
+}
+
+.team-a{background:#dbeafe;color:#1d4ed8}
+.team-b{background:#ffedd5;color:#9a3412}
+.team-c{background:#dcfce7;color:#166534}
+.team-d{background:#f3e8ff;color:#7e22ce}
+
+.off-cell{background:rgba(239,207,126,.22)!important;padding:5px 2px}
+
+.holiday{
+ display:block;margin-top:3px;color:#b42318;font-size:5.4px;font-weight:800;
+ white-space:nowrap;overflow:hidden
+}
+
+.footer{text-align:center;font-size:6.6px;color:#64748b;margin:14px 0}
+
+/* Mobile adjustments */
+@media(max-width:650px){
+ body{padding:3px}
+ .header{padding:15px 6px}
+ .ship-section{margin-top:10px}
+ .ship-head{padding:0 10px}
+ .ship-head h2{font-size:7.2px}
+ .ship-card{flex-basis:190px;height:52px}
+ .shift-card{flex-basis:82%;min-width:240px;min-height:125px;padding:10px}
+ .card-team{gap:3px;margin-top:12px}
+ .member-chip{font-size:5.4px;padding:5px 4px}
+ .card-time{font-size:6.6px}
+ .card-countdown{font-size:6px;padding:5px 8px}
+ .schedule-wrap{padding:0;margin-top:12px;border-radius:13px}
+ .schedule-controls{
+  width:calc(100% + 6px);margin:0 -3px;padding:11px 8px;gap:5px;
+  border-radius:12px 12px 0 0
+ }
+ .schedule-controls-title{font-size:8.4px;letter-spacing:-.2px}
+ .spinners{gap:5px}
+ .schedule-controls select{padding:9px 5px;font-size:7.2px}
+ th,td{padding:5px 1px;font-size:5.4px}
+ .team{
+  padding:5px 0;font-size:4.8px;border-radius:6px;
+  white-space:nowrap;overflow-wrap:normal;word-break:keep-all
+ }
+ .holiday{font-size:4.8px}
+}
+
+/* Extra-small phones */
+@media(max-width:360px){
+ .ship-card{flex-basis:175px;height:47px;padding:6px 10px}
+ .ship-num{font-size:3.6px;margin-bottom:3px}
+ .ship-name{font-size:6px}
+ .schedule-controls{padding:9px 6px;gap:4px}
+ .schedule-controls-title{font-size:7.2px}
+ .spinners{gap:3px}
+ .schedule-controls select{font-size:6.6px;padding:8px 3px}
+}
+
+/* Running indicator */
+@keyframes livePulse3D{
+ 0%,100%{
+  opacity:1;transform:scale(1);
+  box-shadow:0 0 3px #ff3d00,0 0 7px rgba(255,61,0,.65),
+  inset -2px -2px 3px #a80000,inset 1px 1px 2px #ffb300
+ }
+ 50%{
+  opacity:.35;transform:scale(.96);
+  box-shadow:0 0 1px #ff3d00,0 0 3px rgba(255,61,0,.25),
+  inset -2px -2px 3px #a80000,inset 1px 1px 2px #ff8f00
+ }
+}
+
+.running-dot{
+ display:inline-block;flex-shrink:0;width:10px;height:10px;margin-right:5px;
+ border-radius:50%;vertical-align:middle;
+ background:radial-gradient(circle at 30% 25%,#ffb300 0%,#ff6d00 35%,#ff3d00 70%,#a80000 100%);
+ animation:livePulse3D 1.8s ease-in-out infinite
+}
+
+/* ===== MOBILE WEBVIEW: SMALLER TABLE TEXT ===== */
+@media (max-width: 650px) {
+  th,
+  td {
+    font-size: 7px !important;
+    padding: 3px 1px !important;
+    line-height: 1.15 !important;
+  }
+
+  .team {
+    font-size: 7px !important;
+    padding: 4px 1px !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: clip;
+  }
+
+  .date-cell {
+    font-size: 7px !important;
+    white-space: nowrap;
+  }
+
+  .holiday {
+    font-size: 6px !important;
+  }
+
+  /* ===== SMALLER SHIFT OVERVIEW CARDS ===== */
+  .shift-card {
+    flex: 0 0 70% !important;
+    min-width: 0 !important;
+    max-width: 220px !important;
+    min-height: 100px !important;
+    padding: 7px !important;
+  }
+
+  .card-title {
+    font-size: 8px !important;
+  }
+
+  .running-shift-label {
+    top: 6px !important;
+    right: 6px !important;
+    padding: 3px 5px !important;
+    font-size: 8px !important;
+  }
+
+  .card-team {
+    gap: 3px !important;
+    margin-top: 8px !important;
+  }
+
+  .member-chip {
+    font-size: 7px !important;
+    padding: 3px !important;
+  }
+
+  .card-time {
+    font-size: 8px !important;
+    margin-top: 6px !important;
+  }
+
+  .card-countdown {
+    font-size: 8px !important;
+    margin-top: 5px !important;
+    padding: 4px 6px !important;
+  }
+}
+
+
+
+
+
+.ship-section.is-vertical .ship-view{overflow:visible;scroll-snap-type:none}
+.ship-section.is-vertical .ship-track{display:flex;flex-direction:column;width:100%;box-sizing:border-box;padding:6px 12px 12px;gap:8px}
+.ship-section.is-vertical .ship-card{flex:0 0 auto;width:100%;box-sizing:border-box;scroll-snap-align:none}
+.ship-section.is-vertical .ship-dots{display:none}
+.ship-section.is-vertical .nav-arrow,.ship-section.is-vertical #shipPrev,.ship-section.is-vertical #shipNext{opacity:0.3;pointer-events:none;cursor:default}
+.ship-section.is-vertical .toggle-view-btn,.ship-section.is-vertical #shipToggleView{background:#2563eb}
+.ship-section.is-vertical .icon-list,.ship-section.is-vertical #shipToggleIconList{display:none!important}
+.ship-section.is-vertical .icon-grid,.ship-section.is-vertical #shipToggleIconGrid{display:block!important}
+
+
+
+
+</style>
+</head>
+<body>
+<div class="page">
+<header class="header">
+ <div class="company">SUMMIT OIL &amp; SHIPPING COMPANY LIMITED</div>
+ <div class="subtitle">Madanganj Tank Terminal, Narayanganj</div>
+</header>
+
+<section class="ship-section" id="toolsSection">
+ <div class="ship-head">
+  <h2>TOOLS</h2>
+  <div class="ship-nav">
+   <button id="toolPrev" class="nav-arrow" type="button" aria-label="Previous tool">&#8249;</button>
+   <button id="toolNext" class="nav-arrow" type="button" aria-label="Next tool">&#8250;</button>
+   <button id="toolToggleView" class="toggle-view-btn" type="button" aria-label="Toggle vertical view" title="Toggle vertical view">
+    <svg id="toolToggleIconList" class="icon-list" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:auto;"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+    <svg id="toolToggleIconGrid" class="icon-grid" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;margin:auto;"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M8 4v16"></path><path d="M16 4v16"></path></svg>
+   </button>
+  </div>
+ </div>
+ <div class="ship-view" id="toolView"><div class="ship-track" id="toolTrack"></div></div>
+ <div class="ship-dots" id="toolDots"></div>
+</section>
+
+<section class="ship-section" id="shipSection">
+ <div class="ship-head">
+  <h2>ALL SHIP AND TANK CALIBRATION</h2>
+  <div class="ship-nav">
+   <button id="shipPrev" class="nav-arrow" type="button" aria-label="Previous ship">&#8249;</button>
+   <button id="shipNext" class="nav-arrow" type="button" aria-label="Next ship">&#8250;</button>
+   <button id="shipToggleView" class="toggle-view-btn" type="button" aria-label="Toggle vertical view" title="Toggle vertical view">
+    <svg id="shipToggleIconList" class="icon-list" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:auto;"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+    <svg id="shipToggleIconGrid" class="icon-grid" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;margin:auto;"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M8 4v16"></path><path d="M16 4v16"></path></svg>
+   </button>
+  </div>
+ </div>
+ <div class="ship-view" id="shipView"><div class="ship-track" id="shipTrack"></div></div>
+ <div class="ship-dots" id="shipDots"></div>
+</section>
+
+<section>
+ <div class="cards-heading">
+  <h2 id="overviewHeading">Shift Overview</h2>
+  <div class="nav">
+   <button id="cardPrev" type="button">&#8249;</button>
+   <button id="cardNext" type="button">&#8250;</button>
+  </div>
+ </div>
+ <div class="cards-viewport" id="cardsViewport">
+  <div class="cards-track">
+   <div class="shift-card" id="shiftCard0">
+    <div class="card-title" id="cardTitle0"><span class="running-dot"></span> Running Shift</div>
+    <div class="running-shift-label" id="shiftLabel0">Shift: A</div>
+    <div class="card-team" id="cardTeam0">—</div>
+    <div class="card-time" id="cardTime0">—</div>
+    <div class="card-countdown" id="cardCountdown0">—</div>
+   </div>
+   <div class="shift-card" id="shiftCard1">
+    <div class="card-title">◷ Next Shift</div>
+    <div class="running-shift-label" id="shiftLabel1">Shift: B</div>
+    <div class="card-team" id="cardTeam1">—</div>
+    <div class="card-time" id="cardTime1">—</div>
+    <div class="card-countdown" id="cardCountdown1">—</div>
+   </div>
+   <div class="shift-card" id="shiftCard2">
+    <div class="card-title">◴ Upcoming Shift</div>
+    <div class="running-shift-label" id="shiftLabel2">Shift: C</div>
+    <div class="card-team" id="cardTeam2">—</div>
+    <div class="card-time" id="cardTime2">—</div>
+    <div class="card-countdown" id="cardCountdown2">—</div>
+   </div>
+   <div class="shift-card" id="shiftCard3">
+    <div class="card-title">✓ Day Off</div>
+    <div class="running-shift-label" id="shiftLabel3">Shift: D</div>
+    <div class="card-team" id="cardTeam3">—</div>
+    <div class="card-time" id="cardTime3">Scheduled day off</div>
+    <div class="card-countdown" id="cardCountdown3">—</div>
+   </div>
+  </div>
+ </div>
+ <div class="card-dots" id="cardDots"><span class="active"></span><span></span><span></span><span></span></div>
+</section>
+
+<section class="schedule-wrap">
+ <div class="schedule-controls">
+  <div class="schedule-controls-title">SHIFT SCHEDULE</div>
+  <div class="spinners">
+   <select id="monthSelect" aria-label="Month"></select>
+   <select id="yearSelect" aria-label="Year"></select>
+  </div>
+ </div>
+ <div class="table-scroll">
+  <table>
+   <thead><tr><th>Date</th><th>Morning<br>07–15</th><th>Evening<br>15–23</th><th>Night<br>23–07</th><th>Day Off</th></tr></thead>
+   <tbody id="scheduleBody"></tbody>
+  </table>
+ </div>
+</section>
+<div class="footer">Summit Oil &amp; Shipping Company Limited · Madanganj Tank Terminal</div>
+</div>
+
+
+
+
+
+
+<script>
+function openTool(tag){
+ try{
+  if(window.Android&&typeof window.Android.openTool==="function"){
+   window.Android.openTool(tag);
+   return;
+  }
+  if(window.TinyDB&&typeof window.TinyDB.openTool==="function"){
+   window.TinyDB.openTool(tag);
+   return;
+  }
+  alert("Open this tool inside the SNTT Android app.");
+ }catch(e){alert("Could not open the tool. Please download it first.");}
+}
+
+
+// ============================================================================
+// 🛠️ TOOLS LIST & CAROUSEL (ডুপ্লিকেট টুলস সেকশন)
+// নতুন যেকোনো টুল যুক্ত করতে নিচে শুধুমাত্র name, label এবং tag যোগ করলেই হবে
+// ============================================================================
+const tools = [
+  {
+    name: "Advance Oil Calculator",
+    label: "TOOL 01",
+    tag: "Advance Oil Calculator.html"
+  },
+  {
+    name: "Dhaka to Narayongonj Train",
+    label: "TOOL 02",
+    tag: "Dhaka to Narayongonj train.html"
+  }
+];
+
+const toolView = document.getElementById("toolView");
+const toolTrack = document.getElementById("toolTrack");
+const toolDots = document.getElementById("toolDots");
+
+if (toolTrack && toolDots) {
+  tools.forEach((t, i) => {
+    const c = document.createElement("button");
+    c.type = "button";
+    c.className = "ship-card";
+    c.setAttribute("aria-label", t.name);
+
+    const n = document.createElement("span");
+    n.className = "ship-num";
+    n.textContent = t.label || ("TOOL " + String(i + 1).padStart(2, "0"));
+
+    const title = document.createElement("span");
+    title.className = "ship-name";
+    title.textContent = t.name;
+
+    c.append(n, title);
+    c.onclick = () => openTool(t.tag);
+    toolTrack.append(c);
+
+    const d = document.createElement("button");
+    d.type = "button";
+    d.className = "ship-dot" + (i === 0 ? " active" : "");
+    d.setAttribute("aria-label", "Tool " + (i + 1));
+    d.onclick = () => c.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    toolDots.append(d);
+  });
+}
+
+const toolStep = () => ((toolTrack?.firstElementChild?.offsetWidth) || 190) + 9;
+const toolPrevBtn = document.getElementById("toolPrev");
+const toolNextBtn = document.getElementById("toolNext");
+if (toolPrevBtn && toolView) toolPrevBtn.onclick = () => toolView.scrollBy({ left: -toolStep(), behavior: "smooth" });
+if (toolNextBtn && toolView) toolNextBtn.onclick = () => toolView.scrollBy({ left: toolStep(), behavior: "smooth" });
+
+const toolsSection = document.getElementById("toolsSection");
+const toolToggleBtn = document.getElementById("toolToggleView");
+function toggleToolLayout(forceVertical) {
+  if (!toolsSection) return;
+  const isVert = forceVertical !== undefined ? forceVertical : !toolsSection.classList.contains("is-vertical");
+  toolsSection.classList.toggle("is-vertical", isVert);
+  try { localStorage.setItem("toolViewLayout", isVert ? "vertical" : "horizontal"); } catch(e) {}
+}
+if (toolToggleBtn) {
+  toolToggleBtn.onclick = () => toggleToolLayout();
+}
+try {
+  if (localStorage.getItem("toolViewLayout") === "vertical") toggleToolLayout(true);
+} catch(e) {}
+
+let toolTimer;
+if (toolView && toolDots && toolTrack) {
+  toolView.addEventListener("scroll", () => {
+    cancelAnimationFrame(toolTimer);
+    toolTimer = requestAnimationFrame(() => {
+      let best = 0, dist = Infinity;
+      [...toolTrack.children].forEach((c, i) => {
+        const x = Math.abs(c.getBoundingClientRect().left - toolView.getBoundingClientRect().left);
+        if (x < dist) { dist = x; best = i; }
+      });
+      [...toolDots.children].forEach((d, i) => d.classList.toggle("active", i === best));
+    });
+  });
+}
+
+const ships=[
+["SNTT All Tank",15438,"https://drive.usercontent.google.com/download?id=1tC4GRaIBjzhqBl9Ry7UEww4dm0d3iEXl&export=download"],
+["BAT 01",6,"https://drive.usercontent.google.com/download?id=1QzFs2cm2h7MRl1Up9aopP-Zc80Jh4rID&export=download"],
+["BAT 02",6,"https://drive.usercontent.google.com/download?id=1qcPEZtSlXuyRxL5-d6VptbIHA2HrXHHv&export=download"],
+["BAT 03",6,"https://drive.usercontent.google.com/download?id=18E1cdvNdCVfaPNF4CjfMZXlfK9bDH6ke&export=download"],
+["Binzaman 01",6,"https://drive.usercontent.google.com/download?id=1q08_ENZYdDib20Hgh_zDU9kUeekmiff1&export=download"],
+["Binzaman 02",6,"https://drive.usercontent.google.com/download?id=1WlQxR_z2x92Z0VxMO7wIulxdxyrGmip4&export=download"],
+["Binzaman 03",6,"https://drive.usercontent.google.com/download?id=1XqSkpBntZMQRA8A3u48257M3qQGQRKGb&export=download"],
+["Binzaman 04",6,"https://drive.usercontent.google.com/download?id=1_HDEyU8mBLdbIVLJFXjK67Rc6I2Xlkhy&export=download"],
+["Mesra",6,"https://drive.usercontent.google.com/download?id=13vHg3LGq3p_WWYlwI1ppzIbYCcvpqVx2&export=download"],
+["Kingfisher 03",6,"https://drive.usercontent.google.com/download?id=1ePwDVkpswBPu-3lvkGyj0lOzZWPADWHn&export=download"],
+["Kingfisher 04",6,"https://drive.usercontent.google.com/download?id=1dCtgC1gNWNFyRUN0N9oXLSijdtKwfmHM&export=download"],
+["M.T Rukh",8,"https://drive.usercontent.google.com/download?id=1BKKmBYon3VFg04KKu2pSdLyCyicemnmd&export=download"],
+["Shanghai 07",6,"https://drive.usercontent.google.com/download?id=1N9tvzfOR3xJxh1-8_P6ITdZofaQkZvtv&export=download"],
+["O.T SHANGHAI-01",6,"https://drive.usercontent.google.com/download?id=1vzSKqSiwNlSuYJDygiBYWafF0tFne2WE&export=download"],
+["SNTT Version Code",4.1,"14"]
+];
+
+const shipView=document.getElementById("shipView");
+const shipTrack=document.getElementById("shipTrack");
+const shipDots=document.getElementById("shipDots");
+
+function sendShip(s){
+ const data=JSON.stringify({"Ship Name":s[0],"Tank C":s[1],"C Link":s[2]});
+ window.lastSelectedShip=data;
+ try{
+  if(window.AppInventor&&typeof window.AppInventor.setWebViewString==="function")
+   window.AppInventor.setWebViewString(data);
+ }catch(e){}
+ try{
+  if(window.Android&&typeof window.Android.onShipSelected==="function")
+   window.Android.onShipSelected(data);
+ }catch(e){}
+}
+ships.forEach((s,i)=>{
+ if(i===ships.length-1)return;
+ const c=document.createElement("button");
+ c.type="button";c.className="ship-card";c.setAttribute("aria-label",s[0]);
+ const n=document.createElement("span");
+ n.className="ship-num";n.textContent="CALIBRATION "+String(i+1).padStart(2,"0");
+ const t=document.createElement("span");
+ t.className="ship-name";t.textContent=s[0];
+ c.append(n,t);c.onclick=()=>sendShip(s);shipTrack.append(c);
+ const d=document.createElement("button");
+ d.type="button";d.className="ship-dot"+(i===0?" active":"");
+ d.setAttribute("aria-label","Calibration "+(i+1));
+ d.onclick=()=>c.scrollIntoView({behavior:"smooth",block:"nearest",inline:"start"});
+ shipDots.append(d);
+});
+const shipStep=()=>((shipTrack.firstElementChild?.offsetWidth)||190)+9;
+document.getElementById("shipPrev").onclick=()=>shipView.scrollBy({left:-shipStep(),behavior:"smooth"});
+document.getElementById("shipNext").onclick=()=>shipView.scrollBy({left:shipStep(),behavior:"smooth"});
+const shipSection=document.getElementById("shipSection");
+const shipToggleBtn=document.getElementById("shipToggleView");
+function toggleShipLayout(forceVertical){
+ const isVert = forceVertical !== undefined ? forceVertical : !shipSection.classList.contains("is-vertical");
+ shipSection.classList.toggle("is-vertical", isVert);
+ try{localStorage.setItem("shipViewLayout", isVert ? "vertical" : "horizontal");}catch(e){}
+}
+if(shipToggleBtn){
+ shipToggleBtn.onclick=()=>toggleShipLayout();
+}
+try{
+ if(localStorage.getItem("shipViewLayout")==="vertical") toggleShipLayout(true);
+}catch(e){}
+let shipTimer;
+shipView.addEventListener("scroll",()=>{
+ cancelAnimationFrame(shipTimer);
+ shipTimer=requestAnimationFrame(()=>{
+  let best=0,dist=Infinity;
+  [...shipTrack.children].forEach((c,i)=>{
+   const x=Math.abs(c.getBoundingClientRect().left-shipView.getBoundingClientRect().left);
+   if(x<dist){dist=x;best=i}
+  });
+  [...shipDots.children].forEach((d,i)=>d.classList.toggle("active",i===best));
+ });
+});
+
+const teams=[
+ {name:"তৌহিদ + আতিকুর",className:"team-a",shift:"A",bg:"#2563eb",fg:"#ffffff",members:["তৌহিদ","আতিকুর","ফয়সাল","রাসেল","ইমামুল"]},
+ {name:"ইমরান + রেজাউল",className:"team-b",shift:"B",bg:"#c76a08",fg:"#ffffff",members:["রেজাউল","ইমরান","সালাম","খোকন","শাকিল","সোহেল"]},
+ {name:"হাসু মন্ডল + পিজন",className:"team-c",shift:"C",bg:"#15803d",fg:"#ffffff",members:["হাসু","পিজন","রায়হান","তরিকুল","তানভীর","বাবুল"]},
+ {name:"আরাফাত শুভ + রিয়াজ",className:"team-d",shift:"D",bg:"#7e22ce",fg:"#ffffff",members:["শুভ","রিয়াজ","আশরাফ","মিরাজ","মাহফুজ","কামরুল"]}
+];
+const shiftPatterns=[[2,0,1],[0,1,3],[1,3,2],[3,2,0]];
+const shiftNames=["Morning Shift","Evening Shift","Night Shift"];
+const shiftTimes=["07:00–15:00","15:00–23:00","23:00–07:00"];
+const referenceSerial=Date.UTC(2026,9,1)/86400000;
+const holidays={};
+
+// ============================================================================
+// 🎊 উৎসব ও ছুটির তালিকা (FESTIVAL & HOLIDAY JSON LIST)
+// ============================================================================
+// ভবিষ্যতে যেকোনো উৎসব বা ছুটির সময়সূচি নিচের JSON লিস্টে বসিয়ে দিন।
+// উৎসব চলাকালীন শিডিউল টেবিলে স্বয়ংক্রিয়ভাবে উৎসবের নাম ও কত তারিখ থেকে কত তারিখ পর্যন্ত তা দেখাবে।
+// ছুটি শেষ হওয়ার পর যেখান থেকে ডিউটি বন্ধ হয়েছিল ঠিক সেখান থেকেই রেগুলার রোস্টার পুনরায় চালু হবে।
+//
+// 📌 ফরম্যাট (Format):
+// [
+//   {
+//     "festivalName": "উৎসবের নাম",
+//     "startDate": "YYYY-MM-DD",   // শুরুর তারিখ (বছর-মাস-দিন)
+//     "endDate": "YYYY-MM-DD"      // শেষের তারিখ (বছর-মাস-দিন)
+//   }
+// ]
+//
+// 💡 উদাহরণ:
+// const festivalHolidays = [
+//   {
+//     "festivalName": "পবিত্র ঈদুল ফিতর",
+//     "startDate": "2026-03-20",
+//     "endDate": "2026-03-25"
+//   },
+//   {
+//     "festivalName": "পবিত্র ঈদুল আযহা",
+//     "startDate": "2026-05-27",
+//     "endDate": "2026-06-02"
+//   }
+// ];
+// ============================================================================
+
+const festivalHolidays = [
+  {
+    "festivalName": "টেস্ট হলিডে",
+    "startDate": "2026-11-14",
+    "endDate": "2026-11-21"
+  }
+];
+
+// পেছনের সামঞ্জস্যের জন্য:
+const dutyPauseRanges = [];
+
+function getAllPauseRanges(){
+ const list=[];
+ const source=[...(typeof festivalHolidays!=="undefined"&&Array.isArray(festivalHolidays)?festivalHolidays:[]),
+               ...(typeof dutyPauseRanges!=="undefined"&&Array.isArray(dutyPauseRanges)?dutyPauseRanges:[])];
+ for(let i=0;i<source.length;i++){
+  const item=source[i];
+  if(!item)continue;
+  const name=item.festivalName||item.name||item.title||item.note||"উৎসবের ছুটি";
+  const start=item.startDate||item.start||item.from;
+  const end=item.endDate||item.end||item.to;
+  if(start&&end){
+   list.push({name,start,end});
+  }
+ }
+ return list;
+}
+
+function serial(y,m,d){return Date.UTC(y,m,d)/86400000}
+
+function parseDateStrToSerial(str){
+ if(!str)return null;
+ const p=str.split("-");
+ if(p.length!==3)return null;
+ return serial(+p[0],+p[1]-1,+p[2]);
+}
+
+function pad(n){return String(n).padStart(2,"0")}
+function dateKey(y,m,d){return y+"-"+pad(m+1)+"-"+pad(d)}
+
+function formatShortDate(y,m,d){
+ const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+ return pad(d)+" "+months[m];
+}
+
+function formatRangeText(startStr,endStr){
+ const p1=startStr.split("-"),p2=endStr.split("-");
+ if(p1.length!==3||p2.length!==3)return startStr+" to "+endStr;
+ const y1=+p1[0],m1=+p1[1]-1,d1=+p1[2];
+ const y2=+p2[0],m2=+p2[1]-1,d2=+p2[2];
+ if(y1===y2&&m1===m2&&d1===d2){
+  return formatShortDate(y1,m1,d1)+" "+y1;
+ }
+ if(y1===y2){
+  return formatShortDate(y1,m1,d1)+" – "+formatShortDate(y2,m2,d2)+" "+y1;
+ }
+ return formatShortDate(y1,m1,d1)+" "+y1+" – "+formatShortDate(y2,m2,d2)+" "+y2;
+}
+
+function getPauseInfoForDate(y,m,d){
+ const cur=serial(y,m,d);
+ const ranges=getAllPauseRanges();
+ for(let i=0;i<ranges.length;i++){
+  const r=ranges[i];
+  const s=parseDateStrToSerial(r.start),e=parseDateStrToSerial(r.end);
+  if(s!==null&&e!==null&&cur>=s&&cur<=e){
+   return {
+    isPaused:true,
+    festivalName:r.name,
+    note:r.name,
+    startDate:r.start,
+    endDate:r.end,
+    rangeText:formatRangeText(r.start,r.end)
+   };
+  }
+ }
+ return {isPaused:false,festivalName:"",note:"",startDate:"",endDate:"",rangeText:""};
+}
+
+function getMergedPauseIntervals(){
+ const ranges=getAllPauseRanges();
+ const intervals=[];
+ for(let i=0;i<ranges.length;i++){
+  const s=parseDateStrToSerial(ranges[i].start);
+  const e=parseDateStrToSerial(ranges[i].end);
+  if(s!==null&&e!==null&&e>=s){
+   intervals.push([s,e]);
+  }
+ }
+ if(intervals.length<=1)return intervals;
+ intervals.sort((a,b)=>a[0]-b[0]);
+ const merged=[intervals[0]];
+ for(let i=1;i<intervals.length;i++){
+  const last=merged[merged.length-1];
+  const cur=intervals[i];
+  if(cur[0]<=last[1]+1){
+   last[1]=Math.max(last[1],cur[1]);
+  }else{
+   merged.push(cur);
+  }
+ }
+ return merged;
+}
+
+function getDeductedDaysUntil(y,m,d){
+ const cur=serial(y,m,d);
+ let deducted=0;
+ const intervals=getMergedPauseIntervals();
+ for(let i=0;i<intervals.length;i++){
+  const s=intervals[i][0];
+  const e=intervals[i][1];
+  const effStart=Math.max(s,referenceSerial);
+  const effEnd=Math.min(e,cur-1);
+  if(effEnd>=effStart){
+   deducted+=(effEnd-effStart+1);
+  }
+ }
+ return deducted;
+}
+
+function dateOffset(y,m,d){
+ return (serial(y,m,d)-referenceSerial)-getDeductedDaysUntil(y,m,d);
+}
+
+function getShiftIndex(y,m,d){return ((Math.floor((dateOffset(y,m,d)+1)/2)%4)+4)%4}
+function getOffIndex(y,m,d){
+ const offset=dateOffset(y,m,d);
+ if(offset===0)return 3;
+ const block=Math.floor((offset+1)/2);
+ const sequence=[2,0,1,3];
+ return sequence[((block-1)%4+4)%4];
+}
+function getRosterForDate(y,m,d){
+ const pauseInfo=getPauseInfoForDate(y,m,d);
+ return {
+  shiftTeams:shiftPatterns[getShiftIndex(y,m,d)],
+  offIndex:getOffIndex(y,m,d),
+  isPaused:pauseInfo.isPaused,
+  festivalName:pauseInfo.festivalName,
+  note:pauseInfo.note,
+  startDate:pauseInfo.startDate,
+  endDate:pauseInfo.endDate,
+  rangeText:pauseInfo.rangeText
+ };
+}
+
+function formatDate(date){
+ return date.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+}
+function formatDuration(ms){
+ const total=Math.max(0,Math.floor(ms/1000));
+ const days=Math.floor(total/86400),hours=Math.floor(total%86400/3600);
+ const minutes=Math.floor(total%3600/60),seconds=total%60;
+ return (days?days+"d ":"")+hours+"h "+minutes+"m "+seconds+"s";
+}
+function teamHTML(index){
+ const t=teams[index];
+ return '<span class="team '+t.className+'">'+t.name+'</span>';
+}
+function memberCardsHTML(team){
+ return team.members.map(name=>'<span class="member-chip">'+name+'</span>').join("");
+}
+function applyTeamColor(cardIndex,teamIndex){
+ const team=teams[teamIndex];
+ const card=document.getElementById("shiftCard"+cardIndex);
+ card.style.background=team.bg;card.style.color=team.fg;
+ card.querySelector(".card-countdown").style.background="#00000020";
+ card.querySelector(".card-countdown").style.color="#ffffff";
+ card.querySelector(".running-shift-label").style.background="#00000020";
+ card.querySelector(".running-shift-label").style.color="#ffffff";
+}
+function populateSpinners(){
+ const month=document.getElementById("monthSelect");
+ const year=document.getElementById("yearSelect");
+ ["January","February","March","April","May","June","July","August","September","October","November","December"].forEach((name,i)=>month.add(new Option(name,i)));
+ for(let y=2024;y<=2035;y++)year.add(new Option(y,y));
+ const now=new Date();
+ month.value=now.getMonth();year.value=now.getFullYear();
+ month.addEventListener("change",renderSchedule);
+ year.addEventListener("change",renderSchedule);
+}
+function renderSchedule(){
+ const month=+document.getElementById("monthSelect").value;
+ const year=+document.getElementById("yearSelect").value;
+ const body=document.getElementById("scheduleBody");
+ const days=new Date(year,month+1,0).getDate();
+ let html="";
+ for(let day=1;day<=days;day++){
+  const date=new Date(year,month,day);
+  const roster=getRosterForDate(year,month,day);
+  const key=dateKey(year,month,day);
+  let dateText=pad(day)+" "+date.toLocaleDateString("en-US",{month:"short"});
+  if(date.getDay()===5)dateText="🕌 "+dateText;
+  html+='<tr><td><span class="date-cell '+(date.getDay()===5?"friday":"")+'">'+dateText+'</span>'+
+   (holidays[key]?'<span class="holiday">'+holidays[key]+'</span>':"")+'</td>';
+  if(roster.isPaused){
+   const festivalTitle=roster.festivalName||roster.note||"উৎসবের ছুটি";
+   const rangeHtml=roster.rangeText?'<div style="font-size:clamp(5px,1.3vw,7.2px);color:#b45309;font-weight:700;margin-top:2px;">📅 '+roster.rangeText+'</div>':'';
+   html+='<td colspan="4" style="text-align:center;font-weight:700;color:#9a3412;background:#fffbeb;padding:7px 4px;border:1px solid rgba(245,158,11,.3);">' +
+     '<div style="font-size:clamp(6.5px,1.7vw,9.5px);line-height:1.25;"><span style="display:inline-block;margin-right:4px;">🎉</span>'+festivalTitle+'</div>' +
+     rangeHtml +
+     '</td></tr>';
+  }else{
+   roster.shiftTeams.forEach(index=>html+='<td>'+teamHTML(index)+'</td>');
+   html+='<td class="off-cell">'+teamHTML(roster.offIndex)+'</td></tr>';
+  }
+ }
+ body.innerHTML=html;
+}
+function getCurrentShiftInfo(now){
+ const hour=now.getHours();
+ let index,start=new Date(now);
+ if(hour<7){index=2;start.setDate(start.getDate()-1);start.setHours(23,0,0,0)}
+ else if(hour<15){index=0;start.setHours(7,0,0,0)}
+ else if(hour<23){index=1;start.setHours(15,0,0,0)}
+ else{index=2;start.setHours(23,0,0,0)}
+ return {index,start,end:new Date(start.getTime()+8*3600000)};
+}
+function shiftAt(start,index){
+ const roster=getRosterForDate(start.getFullYear(),start.getMonth(),start.getDate());
+ return roster.shiftTeams[index];
+}
+function findNextDuty(teamIndex,now){
+ for(let dayOffset=0;dayOffset<=30;dayOffset++){
+  const date=new Date(now);date.setDate(date.getDate()+dayOffset);
+  const y=date.getFullYear(),m=date.getMonth(),d=date.getDate();
+  const roster=getRosterForDate(y,m,d);
+  if(roster.isPaused)continue;
+  for(let shift=0;shift<3;shift++){
+   const start=new Date(y,m,d,[7,15,23][shift],0,0,0);
+   if(start>now&&roster.shiftTeams[shift]===teamIndex)return start;
+  }
+ }
+ return null;
+}
+function findNextResumeDate(now){
+ for(let offset=1;offset<=365;offset++){
+  const d=new Date(now);
+  d.setDate(d.getDate()+offset);
+  const r=getRosterForDate(d.getFullYear(),d.getMonth(),d.getDate());
+  if(!r.isPaused)return d;
+ }
+ return null;
+}
+
+function updateCards(){
+ const now=new Date();
+ const todayRoster=getRosterForDate(now.getFullYear(),now.getMonth(),now.getDate());
+ const heading=document.getElementById("overviewHeading");
+
+ if(todayRoster.isPaused){
+  const resumeDate=findNextResumeDate(now);
+  const festName=todayRoster.festivalName||todayRoster.note||"ছুটি";
+  if(heading)heading.textContent="Shift Overview (🎉 "+festName+" – পরবর্তী ডিউটি)";
+
+  if(resumeDate){
+   const y=resumeDate.getFullYear(),m=resumeDate.getMonth(),d=resumeDate.getDate();
+   const resumeRoster=getRosterForDate(y,m,d);
+   const shiftStarts=[
+    new Date(y,m,d,7,0,0,0),
+    new Date(y,m,d,15,0,0,0),
+    new Date(y,m,d,23,0,0,0)
+   ];
+   const titles=[
+    '<span class="running-dot"></span> 🚀 ছুটি পরবর্তী ১ম ডিউটি',
+    '◐ ছুটি পরবর্তী ২য় ডিউটি',
+    '◓ ছুটি পরবর্তী ৩য় ডিউটি'
+   ];
+
+   for(let i=0;i<3;i++){
+    const teamIndex=resumeRoster.shiftTeams[i];
+    const team=teams[teamIndex];
+    applyTeamColor(i,teamIndex);
+    const titleEl=document.getElementById("cardTitle"+i);
+    if(titleEl)titleEl.innerHTML=titles[i];
+    document.getElementById("cardTeam"+i).innerHTML=memberCardsHTML(team);
+    document.getElementById("shiftLabel"+i).textContent="Shift: "+team.shift;
+    document.getElementById("cardTime"+i).textContent=shiftNames[i]+" • "+shiftTimes[i]+" • "+formatDate(shiftStarts[i]);
+    document.getElementById("cardCountdown"+i).textContent="Starts in "+formatDuration(shiftStarts[i]-now);
+   }
+
+   const offTeamIndex=resumeRoster.offIndex;
+   const offTeam=teams[offTeamIndex];
+   applyTeamColor(3,offTeamIndex);
+   const titleEl3=document.getElementById("cardTitle3");
+   if(titleEl3)titleEl3.innerHTML="✨ ছুটি পরবর্তী Day Off";
+   document.getElementById("cardTeam3").innerHTML=memberCardsHTML(offTeam);
+   document.getElementById("shiftLabel3").textContent="Shift: "+offTeam.shift;
+   document.getElementById("cardTime3").textContent="Scheduled day off • "+formatDate(shiftStarts[0]);
+   const nextDuty=findNextDuty(offTeamIndex,shiftStarts[0]);
+   document.getElementById("cardCountdown3").textContent=nextDuty?"Next Duty in "+formatDuration(nextDuty-now):"Next Duty time unavailable";
+  }
+ }else{
+  if(heading)heading.textContent="Shift Overview";
+  const titleEl0=document.getElementById("cardTitle0");
+  if(titleEl0)titleEl0.innerHTML='<span class="running-dot"></span> Running Shift';
+  const titleEl1=document.getElementById("cardTitle1");
+  if(titleEl1)titleEl1.innerHTML='◐ Next Shift';
+  const titleEl2=document.getElementById("cardTitle2");
+  if(titleEl2)titleEl2.innerHTML='◓ Upcoming Shift';
+  const titleEl3=document.getElementById("cardTitle3");
+  if(titleEl3)titleEl3.innerHTML='✨ Day Off';
+
+  const current=getCurrentShiftInfo(now);
+  for(let i=0;i<3;i++){
+   const start=new Date(current.start.getTime()+i*8*3600000);
+   const end=new Date(start.getTime()+8*3600000);
+   const index=start.getHours()===7?0:start.getHours()===15?1:2;
+   const teamIndex=shiftAt(start,index),team=teams[teamIndex];
+   applyTeamColor(i,teamIndex);
+   document.getElementById("cardTeam"+i).innerHTML=memberCardsHTML(team);
+   document.getElementById("shiftLabel"+i).textContent="Shift: "+team.shift;
+   document.getElementById("cardTime"+i).textContent=shiftNames[index]+" • "+shiftTimes[index]+" • "+formatDate(start);
+   document.getElementById("cardCountdown"+i).textContent=i===0?"Ends in "+formatDuration(end-now):"Starts in "+formatDuration(start-now);
+  }
+
+  const todayRoster=getRosterForDate(now.getFullYear(),now.getMonth(),now.getDate());
+  const offTeamIndex=todayRoster.offIndex,offTeam=teams[offTeamIndex];
+  applyTeamColor(3,offTeamIndex);
+  document.getElementById("cardTeam3").innerHTML=memberCardsHTML(offTeam);
+  document.getElementById("shiftLabel3").textContent="Shift: "+offTeam.shift;
+  document.getElementById("cardTime3").textContent="Scheduled day off • "+formatDate(now);
+  const nextDuty=findNextDuty(offTeamIndex,now);
+  document.getElementById("cardCountdown3").textContent=nextDuty?"Next Duty in "+formatDuration(nextDuty-now):"Next Duty time unavailable";
+ }
+ updateCardDots();
+}
+function updateCardDots(){
+ const view=document.getElementById("cardsViewport");
+ const dots=document.querySelectorAll("#cardDots span");
+ const max=view.scrollWidth-view.clientWidth;
+ const active=max>0?Math.round(view.scrollLeft/max*(dots.length-1)):0;
+ dots.forEach((dot,i)=>dot.classList.toggle("active",i===active));
+}
+document.getElementById("cardPrev").addEventListener("click",()=>{
+ const view=document.getElementById("cardsViewport");
+ view.scrollBy({left:-view.clientWidth*.8,behavior:"smooth"});
+});
+document.getElementById("cardNext").addEventListener("click",()=>{
+ const view=document.getElementById("cardsViewport");
+ view.scrollBy({left:view.clientWidth*.8,behavior:"smooth"});
+});
+document.getElementById("cardsViewport").addEventListener("scroll",updateCardDots);
+populateSpinners();
+renderSchedule();
+updateCards();
+setInterval(updateCards,1000);
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+  </html>

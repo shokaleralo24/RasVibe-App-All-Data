@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPTV Player</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { background-color: #0d1117; color: #fff; font-family: sans-serif; margin: 0; padding: 5px; width: 100%; overflow-x: hidden; padding-bottom: 50px; }
+        
+        /* আপনার অ্যাপের টেক্সট বক্সের সাথে সিঙ্ক করার জন্য ফিল্ডটি অদৃশ্য রাখা হয়েছে */
+        .search-box { display: none; }
+
+        .category-bar { display: flex; overflow-x: auto; gap: 8px; padding: 10px 5px; white-space: nowrap; margin-bottom: 10px; position: sticky; top: 0; background-color: #0d1117; z-index: 999; }
+        .category-bar::-webkit-scrollbar { display: none; }
+        .cat-btn { background: #374151; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; flex-shrink: 0; }
+        .cat-btn:hover { background: #58a6ff; }
+        .container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; width: 100%; }
+        
+        /* কার্ডের বর্ডার সম্পূর্ণ স্থির, কোনো অ্যানিমেশন বা ভাইব্রেশন নেই */
+        .card { 
+            background: #161b22; 
+            border: 1px solid #374151; 
+            border-radius: 8px; 
+            padding: 5px; 
+            text-align: center; 
+            cursor: pointer; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100px; 
+            overflow: hidden;
+        }
+
+        .card img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background-color: #2b313b; }
+        .name { font-size: 8px; margin-top: 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; width: 90%; }
+        .loader-wrapper { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #374151; border-top: 4px solid #58a6ff; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .loading-text {
+            grid-column: span 4;
+            text-align: center;
+            font-size: 12px;
+            color: #8b949e;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="status" class="loader-wrapper"><div class="spinner"></div></div>
+    
+    <input type="text" id="search" class="search-box" oninput="filterMatches(this.value)">
+    
+    <div id="cat-container" class="category-bar"></div>
+    <div class="container" id="main"></div>
+
+<script>
+    const targetUrl = "https://raw.githubusercontent.com/DrSujonPaul/Sujon/6dc6a1d4eaa20a9239ae27d8e0f00182b60eeb47/iptv";
+    let allChannels = [];
+    let filteredChannels = [];
+    let displayedCount = 0;
+    const batchSize = 70; // ১০০০+ বা ৫০০০ চ্যানেলে ল্যাগ বা হ্যাং রোধ করার জন্য প্রতিবারে 70টি করে আইটেম লোড হবে
+    let categories = new Set();
+    let currentActiveCategory = "All";
+
+    async function loadChannels() {
+        try {
+            const response = await fetch(targetUrl);
+            const data = await response.text();
+            parseM3U(data);
+        } catch (error) { 
+            document.getElementById('status').innerHTML = "<div style='color:red;'>নেটওয়ার্ক এরর!</div>"; 
+        }
+    }
+
+    // প্লেলিস্ট থেকে নিখুঁতভাবে লিংক, কুকি, রেফারার এবং ডিআরএম এক্সট্রাক্ট করার লজিক
+    function parseM3U(data) {
+        const lines = data.split('\n');
+        
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].startsWith("#EXTINF")) {
+                let name = lines[i].split(',').pop().trim();
+                let group = lines[i].includes('group-title="') ? lines[i].split('group-title="')[1].split('"')[0] : "Others";
+                let logo = lines[i].match(/tvg-logo="(.*?)"/)?.[1] || '';
+                
+                let j = i + 1;
+                let url = "", licenseKey = "", cookie = "", referer = "";
+
+                while (j < lines.length && !lines[j].startsWith("#EXTINF")) {
+                    let line = lines[j].trim();
+                    if (line.startsWith("http")) url = line;
+                    if (line.includes("license_key=")) licenseKey = line.split("license_key=")[1].trim();
+                    if (line.includes("Edge-Cache-Cookie=")) cookie = line.split("Edge-Cache-Cookie=")[1].split(/[ "']/)[0];
+                    if (line.includes("http-referrer=")) referer = line.split("http-referrer=")[1].split(/[ "']/)[0];
+                    j++;
+                }
+
+                let finalOutput = url;
+                if (cookie) finalOutput += `|Cookie=Edge-Cache-Cookie=${cookie}`;
+                if (referer) finalOutput += `|Referer=${referer}`;
+                if (licenseKey) finalOutput += `|drmScheme=clearkey&drmLicense=${licenseKey}`;
+
+                if (url) {
+                    allChannels.push({ name, url: finalOutput, logo, group });
+                    categories.add(group);
+                }
+                i = j - 1;
+            }
+        }
+        
+        document.getElementById('status').style.display = 'none';
+        renderCategories();
+        filterCategoriesAndSearch(); 
+
+        // ইনফিনিট স্ক্রোল বা লেজি লোডিং ফিচার যা ৫০০০+ আইটেমেও স্মুথ রাখে
+        window.addEventListener('scroll', () => {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
+                loadMoreChannels();
+            }
+        });
+    }
+
+    function renderCategories() {
+        const bar = document.getElementById('cat-container');
+        bar.innerHTML = `<button class="cat-btn" onclick="filterByCategory('All')">All (${allChannels.length})</button>`;
+        Array.from(categories).sort().forEach(cat => {
+            const count = allChannels.filter(ch => ch.group === cat).length;
+            bar.innerHTML += `<button class="cat-btn" onclick="filterByCategory('${cat}')">${cat} (${count})</button>`;
+        });
+    }
+
+    function filterByCategory(cat) {
+        currentActiveCategory = cat;
+        filterCategoriesAndSearch();
+    }
+
+    function filterMatches(query) {
+        const searchInput = document.getElementById('search');
+        if (searchInput && searchInput.value !== query) {
+            searchInput.value = query;
+        }
+        filterCategoriesAndSearch();
+    }
+
+    function filterCategoriesAndSearch() {
+        const searchInput = document.getElementById('search');
+        const query = searchInput ? searchInput.value.toLowerCase() : "";
+        
+        filteredChannels = allChannels.filter(ch => 
+            (currentActiveCategory === 'All' || ch.group === currentActiveCategory) && 
+            ch.name.toLowerCase().includes(query)
+        );
+        
+        displayedCount = 0;
+        document.getElementById('main').innerHTML = '';
+        loadMoreChannels();
+    }
+
+    function loadMoreChannels() {
+        const main = document.getElementById('main');
+        
+        const oldMsg = main.querySelector('.loading-text');
+        if (oldMsg) oldMsg.remove();
+
+        let nextBatch = filteredChannels.slice(displayedCount, displayedCount + batchSize);
+
+        if (nextBatch.length === 0 && displayedCount === 0) {
+            main.innerHTML = '<div class="loading-text">channels not found</div>';
+            return;
+        }
+
+        nextBatch.forEach((ch) => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `<img src="${ch.logo || 'https://via.placeholder.com/60'}"><div class="name">${ch.name}</div>`;
+            div.onclick = () => {
+                if (window.AppInventor) window.AppInventor.setWebViewString(ch.url);
+                else if (window.CustomWebView) window.CustomWebView.setWebViewString(ch.url);
+                else alert("আউটপুট: " + ch.url);
+            };
+            main.appendChild(div);
+        });
+
+        displayedCount += nextBatch.length;
+    }
+
+    loadChannels();
+</script>
+</body>
+</html>
+

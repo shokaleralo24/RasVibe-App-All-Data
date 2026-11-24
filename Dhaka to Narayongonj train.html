@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ঢাকা - নারায়ণগঞ্জ ট্রেন সময়সূচি ও লাইভ ট্র্যাকিং</title>
+    <style>
+        :root {
+            --primary-color: #004d40;
+            --accent-color: #ff6f00;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #b2dfdb;
+            --progress-green: #2e7d32;
+        }
+
+        body {
+            font-family: 'SolaimanLipi', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 8px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 2px;
+            font-size: 20px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .live-clock {
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+            background: #fff8e1;
+            padding: 4px;
+            border-radius: 4px;
+            border: 1px solid #ffe082;
+        }
+
+        .next-train-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .next-card {
+            flex: 1;
+            background: linear-gradient(135deg, #004d40, #00796b);
+            color: white;
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        }
+
+        .next-card h3 {
+            margin: 0 0 3px 0;
+            font-size: 11px;
+            color: #ffeb3b;
+        }
+
+        .next-card .time-display {
+            font-size: 11px;
+            font-weight: bold;
+            line-height: 1.3;
+        }
+
+        .countdown-text {
+            font-size: 10px;
+            color: #ffcc80;
+            margin-top: 2px;
+        }
+
+        .schedule-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 15px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            font-size: 10px;
+            table-layout: fixed;
+        }
+
+        th, td {
+            padding: 6px 2px;
+            border-bottom: 1px solid var(--border-color);
+            word-wrap: break-word;
+            overflow: hidden;
+        }
+
+        th {
+            background-color: #e0f2f1;
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 10px;
+        }
+
+        tr:hover {
+            background-color: #f9fbfb;
+        }
+
+        .time-slot {
+            font-weight: bold;
+            color: var(--accent-color);
+            background-color: #fff8e1;
+            font-size: 10px;
+        }
+
+        .highlight-row {
+            background-color: #fffde7 !important;
+            font-weight: bold;
+            border: 2px solid #ffb300;
+        }
+
+        /* Train Progress Tracker Style */
+        .progress-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .progress-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .progress-subtitle {
+            font-size: 11px;
+            color: #d84315;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .station-progress-list {
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .station-progress-list::before {
+            content: '';
+            position: absolute;
+            left: 9px;
+            top: 5px;
+            bottom: 5px;
+            width: 3px;
+            background-color: var(--progress-green);
+        }
+
+        .progress-item {
+            position: relative;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .progress-item::before {
+            content: '';
+            position: absolute;
+            left: -19px;
+            top: 4px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: white;
+            border: 3px solid var(--progress-green);
+        }
+
+        .progress-item.passed::before {
+            background-color: var(--progress-green);
+        }
+
+        .progress-item.current::before {
+            content: '🚂';
+            position: absolute;
+            left: -23px;
+            top: -2px;
+            width: auto;
+            height: auto;
+            background-color: transparent;
+            border: none;
+            box-shadow: none;
+            font-size: 14px;
+        }
+
+        .station-name {
+            font-weight: bold;
+        }
+
+        .station-status {
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .progress-item.current .station-status {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>ঢাকা - নারায়ণগঞ্জ ট্রেন সময়সূচি</h1>
+    <div class="subtitle">(শনিবার থেকে শুক্রবার কার্যকর)</div>
+
+    <div id="live-clock" class="live-clock">বর্তমান সময়: লোড হচ্ছে...</div>
+
+    <div class="next-train-container">
+        <div class="next-card">
+            <h3>ঢাকা থেকে পরবর্তী ট্রেন</h3>
+            <div id="next-dhaka" class="time-display">লোড হচ্ছে...</div>
+            <div id="countdown-dhaka" class="countdown-text"></div>
+        </div>
+        <div class="next-card">
+            <h3>নারায়ণগঞ্জ থেকে পরবর্তী ট্রেন</h3>
+            <div id="next-narayanganj" class="time-display">লোড হচ্ছে...</div>
+            <div id="countdown-narayanganj" class="countdown-text"></div>
+        </div>
+    </div>
+
+    <!-- Live Train Progress Tracker Section -->
+    <div class="progress-card">
+        <div class="progress-title">লাইভ ট্রেন প্রগ্রেস ও স্টেশনের অবস্থা</div>
+        <div id="progress-sub" class="progress-subtitle">চলমান ট্রেন: খোঁজ করা হচ্ছে...</div>
+        <div class="station-progress-list" id="progress-container"></div>
+    </div>
+
+    <!-- Table 1: Dhaka to Narayanganj -->
+    <div class="schedule-card">
+        <div class="card-header">ঢাকা থেকে নারায়ণগঞ্জ সময়সূচি (আপ)</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>সময়</th>
+                    <th>ঢাকা</th>
+                    <th>গেণ্ডারিয়া</th>
+                    <th>শ্যামপুর</th>
+                    <th>পাগলা</th>
+                    <th>ফতুল্লা</th>
+                    <th>চাষাড়া</th>
+                    <th>নারায়ণ</th>
+                </tr>
+            </thead>
+            <tbody id="tbody-dhaka">
+                <tr data-time="04:30">
+                    <td class="time-slot">ভোর</td>
+                    <td>০৪:৩০ AM</td>
+                    <td>০৪:৩৯ AM</td>
+                    <td>০৪:৪৬ AM</td>
+                    <td>০৪:৫৩ AM</td>
+                    <td>০৫:০০ AM</td>
+                    <td>০৫:০৯ AM</td>
+                    <td>০৫:১৫ AM</td>
+                </tr>
+                <tr data-time="06:55">
+                    <td class="time-slot">সকাল</td>
+                    <td>০৬:৫৫ AM</td>
+                    <td>০৭:০৪ AM</td>
+                    <td>০৭:১১ AM</td>
+                    <td>০৭:১৮ AM</td>
+                    <td>০৭:২৫ AM</td>
+                    <td>০৭:৩৪ AM</td>
+                    <td>০৭:৪০ AM</td>
+                </tr>
+                <tr data-time="09:15">
+                    <td class="time-slot">সকাল</td>
+                    <td>০৯:১৫ AM</td>
+                    <td>০৯:২৪ AM</td>
+                    <td>০৯:৩১ AM</td>
+                    <td>০৯:৩৮ AM</td>
+                    <td>০৯:৪৫ AM</td>
+                    <td>০৯:৫৪ AM</td>
+                    <td>১০:০০ AM</td>
+                </tr>
+                <tr data-time="12:25">
+                    <td class="time-slot">দুপুর</td>
+                    <td>১২:২৫ PM</td>
+                    <td>১২:৩৪ PM</td>
+                    <td>১২:৪১ PM</td>
+                    <td>১২:৪৮ PM</td>
+                    <td>১২:৫৫ PM</td>
+                    <td>০১:০৮ PM</td>
+                    <td>০১:১০ PM</td>
+                </tr>
+                <tr data-time="14:42">
+                    <td class="time-slot">দুপুর</td>
+                    <td>০২:৪২ PM</td>
+                    <td>০২:৫২ PM</td>
+                    <td>০৩:০১ PM</td>
+                    <td>০৩:০৮ PM</td>
+                    <td>০৩:১৫ PM</td>
+                    <td>০৩:২৪ PM</td>
+                    <td>০৩:৩০ PM</td>
+                </tr>
+                <tr data-time="17:05">
+                    <td class="time-slot">বিকাল</td>
+                    <td>০৫:০৫ PM</td>
+                    <td>০৫:১৪ PM</td>
+                    <td>০৫:২১ PM</td>
+                    <td>০৫:২৮ PM</td>
+                    <td>০৫:৩৫ PM</td>
+                    <td>০৫:৪৪ PM</td>
+                    <td>০৫:৫০ PM</td>
+                </tr>
+                <tr data-time="19:05">
+                    <td class="time-slot">সন্ধ্যা</td>
+                    <td>০৭:০৫ PM</td>
+                    <td>০৭:৪৪ PM</td>
+                    <td>০৭:৫১ PM</td>
+                    <td>০৭:৫৮ PM</td>
+                    <td>০৮:০৫ PM</td>
+                    <td>০৮:১৪ PM</td>
+                    <td>০৮:২০ PM</td>
+                </tr>
+                <tr data-time="21:55">
+                    <td class="time-slot">রাত</td>
+                    <td>০৯:৫৫ PM</td>
+                    <td>১০:০৮ PM</td>
+                    <td>১০:১১ PM</td>
+                    <td>১০:১৮ PM</td>
+                    <td>১০:২৫ PM</td>
+                    <td>১০:৩৪ PM</td>
+                    <td>১০:৪০ PM</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Table 2: Narayanganj to Dhaka -->
+    <div class="schedule-card">
+        <div class="card-header">নারায়ণগঞ্জ থেকে ঢাকা সময়সূচি (ডাউন)</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>সময়</th>
+                    <th>নারায়ণ</th>
+                    <th>চাষা</th>
+                    <th>ফতুল্লা</th>
+                    <th>পাগলা</th>
+                    <th>শ্যামপুর</th>
+                    <th>গেণ্ডা</th>
+                    <th>ঢাকা</th>
+                </tr>
+            </thead>
+            <tbody id="tbody-narayanganj">
+                <tr data-time="05:45">
+                    <td class="time-slot">ভোর</td>
+                    <td>০৫:৪৫ AM</td>
+                    <td>০৫:৫২ AM</td>
+                    <td>০৬:০০ AM</td>
+                    <td>০৬:০৭ AM</td>
+                    <td>০৬:১৪ AM</td>
+                    <td>০৬:২২ AM</td>
+                    <td>০৬:৩০ AM</td>
+                </tr>
+                <tr data-time="08:00">
+                    <td class="time-slot">সকাল</td>
+                    <td>০৮:০০ AM</td>
+                    <td>০৮:০৭ AM</td>
+                    <td>০৮:১৬ AM</td>
+                    <td>০৮:২৩ AM</td>
+                    <td>০৮:৩০ AM</td>
+                    <td>০৮:৩৮ AM</td>
+                    <td>০৮:৪৫ AM</td>
+                </tr>
+                <tr data-time="10:25">
+                    <td class="time-slot">সকাল</td>
+                    <td>১০:২৫ AM</td>
+                    <td>১০:৩২ AM</td>
+                    <td>১০:৪০ AM</td>
+                    <td>১০:৪৬ AM</td>
+                    <td>১০:৫৩ AM</td>
+                    <td>১১:০০ AM</td>
+                    <td>১১:০৮ AM</td>
+                </tr>
+                <tr data-time="13:05">
+                    <td class="time-slot">দুপুর</td>
+                    <td>০১:০৫ PM</td>
+                    <td>০১:১২ PM</td>
+                    <td>০১:৫০ PM</td>
+                    <td>০১:৫৭ PM</td>
+                    <td>০২:০৮ PM</td>
+                    <td>০২:১১ PM</td>
+                    <td>০২:১৯ PM</td>
+                </tr>
+                <tr data-time="15:55">
+                    <td class="time-slot">দুপুর</td>
+                    <td>০৩:৫৫ PM</td>
+                    <td>০৪:০২ PM</td>
+                    <td>০৪:১০ PM</td>
+                    <td>০৪:১৭ PM</td>
+                    <td>০৪:২৪ PM</td>
+                    <td>০৪:৩২ PM</td>
+                    <td>০৪:৪০ PM</td>
+                </tr>
+                <tr data-time="18:20">
+                    <td class="time-slot">বিকাল</td>
+                    <td>০৬:২০ PM</td>
+                    <td>০৬:২৭ PM</td>
+                    <td>০৬:৩৫ PM</td>
+                    <td>০৬:৪২ PM</td>
+                    <td>০৬:৪৯ PM</td>
+                    <td>০৬:৫৬ PM</td>
+                    <td>০৭:০৫ PM</td>
+                </tr>
+                <tr data-time="20:45">
+                    <td class="time-slot">সন্ধ্যা</td>
+                    <td>০৮:৪৫ PM</td>
+                    <td>০৮:৫২ PM</td>
+                    <td>০৯:০০ PM</td>
+                    <td>০৯:০৯ PM</td>
+                    <td>০৯:১৮ PM</td>
+                    <td>০৯:২১ PM</td>
+                    <td>০৯:৩০ PM</td>
+                </tr>
+                <tr data-time="23:05">
+                    <td class="time-slot">রাত</td>
+                    <td>১১:০৫ PM</td>
+                    <td>১১:১২ PM</td>
+                    <td>১১:২০ PM</td>
+                    <td>১১:২৮ PM</td>
+                    <td>১১:৩৪ PM</td>
+                    <td>১১:৪১ PM</td>
+                    <td>১১:৫০ PM</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const dhakaStations = ["ঢাকা", "গেণ্ডারিয়া", "শ্যামপুর", "পাগলা", "ফতুল্লা", "চাষাড়া", "নারায়ণগঞ্জ"];
+    const narayanganjStations = ["নারায়ণগঞ্জ", "চাষাড়া", "ফতুল্লা", "পাগলা", "শ্যামপুর", "গেণ্ডারিয়া", "ঢাকা"];
+
+    const dhakaToNgyTimes = [
+        { period: "ভোর", timeStr: "০৪:৩০", totalMins: 270, arr: "০৫:১৫", timeKey: "04:30", route: dhakaStations },
+        { period: "সকাল", timeStr: "০৬:৫৫", totalMins: 415, arr: "০৭:৪০", timeKey: "06:55", route: dhakaStations },
+        { period: "সকাল", timeStr: "০৯:১৫", totalMins: 555, arr: "১০:০০", timeKey: "09:15", route: dhakaStations },
+        { period: "দুপুর", timeStr: "১২:২৫", totalMins: 745, arr: "০১:১০", timeKey: "12:25", route: dhakaStations },
+        { period: "দুপুর", timeStr: "০২:৪২", totalMins: 882, arr: "০৩:৩০", timeKey: "14:42", route: dhakaStations },
+        { period: "বিকাল", timeStr: "০৫:০৫", totalMins: 1025, arr: "০৫:৫০", timeKey: "17:05", route: dhakaStations },
+        { period: "সন্ধ্যা", timeStr: "০৭:০৫", totalMins: 1145, arr: "০৮:২০", timeKey: "19:05", route: dhakaStations },
+        { period: "রাত", timeStr: "০৯:৫৫", totalMins: 1315, arr: "১০:৪০", timeKey: "21:55", route: dhakaStations }
+    ];
+
+    const ngyToDhakaTimes = [
+        { period: "ভোর", timeStr: "০৫:৪৫", totalMins: 345, arr: "০৬:৩০", timeKey: "05:45", route: narayanganjStations },
+        { period: "সকাল", timeStr: "০৮:০০", totalMins: 480, arr: "০৮:৪৫", timeKey: "08:00", route: narayanganjStations },
+        { period: "সকাল", timeStr: "১০:২৫", totalMins: 625, arr: "১১:০৮", timeKey: "10:25", route: narayanganjStations },
+        { period: "দুপুর", timeStr: "০১:০৫", totalMins: 785, arr: "০২:১৯", timeKey: "13:05", route: narayanganjStations },
+        { period: "দুপুর", timeStr: "০৩:৫৫", totalMins: 955, arr: "০৪:৪০", timeKey: "15:55", route: narayanganjStations },
+        { period: "বিকাল", timeStr: "০৬:২০", totalMins: 1100, arr: "০৭:০৫", timeKey: "18:20", route: narayanganjStations },
+        { period: "সন্ধ্যা", timeStr: "০৮:৪৫", totalMins: 1245, arr: "০৯:৩০", timeKey: "20:45", route: narayanganjStations },
+        { period: "রাত", timeStr: "১১:০৫", totalMins: 1385, arr: "১১:৫০", timeKey: "23:05", route: narayanganjStations }
+    ];
+
+    function formatTimeNum(num) {
+        return num < 10 ? "০" + num : num;
+    }
+
+    function convertToBengaliDigits(str) {
+        const bnDigits = {'0':'০', '1':'১', '2':'২', '3':'৩', '4':'৪', '5':'৫', '6':'৬', '7':'৭', '8':'৮', '9':'৯'};
+        return str.toString().replace(/[0-9]/g, w => bnDigits[w]);
+    }
+
+    function updateScheduleProgress(currentTotalSecs) {
+        let activeTrain = null;
+        let routeType = "";
+        const journeyDurationSecs = 45 * 60; // ৪৫ মিনিট জার্নি টাইম সেকেন্ডে
+
+        const currentTotalMins = currentTotalSecs / 60;
+
+        for (let train of dhakaToNgyTimes) {
+            let trainStartSecs = train.totalMins * 60;
+            if (currentTotalSecs >= trainStartSecs && currentTotalSecs <= (trainStartSecs + journeyDurationSecs)) {
+                activeTrain = train;
+                routeType = "ঢাকা ➔ নারায়ণগঞ্জ (আপ)";
+                break;
+            }
+        }
+
+        if (!activeTrain) {
+            for (let train of ngyToDhakaTimes) {
+                let trainStartSecs = train.totalMins * 60;
+                if (currentTotalSecs >= trainStartSecs && currentTotalSecs <= (trainStartSecs + journeyDurationSecs)) {
+                    activeTrain = train;
+                    routeType = "নারায়ণগঞ্জ ➔ ঢাকা (ডাউন)";
+                    break;
+                }
+            }
+        }
+
+        const container = document.getElementById('progress-container');
+        const subTitleElem = document.getElementById('progress-sub');
+
+        if (!activeTrain) {
+            if (currentTotalMins < dhakaToNgyTimes[0].totalMins) {
+                activeTrain = dhakaToNgyTimes[0];
+                routeType = "আজকের প্রথম ট্রেন (আসন্ন)";
+            } else {
+                activeTrain = ngyToDhakaTimes[ngyToDhakaTimes.length - 1];
+                routeType = "আজকের শেষ ট্রেন";
+            }
+        }
+
+        let trainStartSecs = activeTrain.totalMins * 60;
+        let elapsedSecs = Math.max(0, currentTotalSecs - trainStartSecs);
+        if (elapsedSecs > journeyDurationSecs) elapsedSecs = journeyDurationSecs;
+
+        let totalStations = activeTrain.route.length;
+        let stationIntervalSecs = journeyDurationSecs / (totalStations - 1);
+        let currentStationIndex = Math.min(Math.floor(elapsedSecs / stationIntervalSecs), totalStations - 1);
+
+        subTitleElem.innerText = `চলমান ট্রেন: ${routeType} (${activeTrain.period} ${activeTrain.timeStr})`;
+
+        let html = '';
+        activeTrain.route.forEach((station, index) => {
+            let statusClass = "";
+            let statusText = "পরবর্তী স্টেশন";
+            
+            if (index < currentStationIndex) {
+                statusClass = "passed";
+                statusText = "অতিক্রম করেছে";
+            } else if (index === currentStationIndex) {
+                statusClass = "current";
+                statusText = "🚂 ট্রেন এখানে অবস্থান করছে";
+            }
+
+            html += `
+                <div class="progress-item ${statusClass}">
+                    <span class="station-name">${station}</span>
+                    <span class="station-status">${statusText}</span>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    function updateApp() {
+        const now = new Date();
+        const currentHours = now.getHours();
+        const currentMins = now.getMinutes();
+        const currentSecs = now.getSeconds();
+        const currentTotalSecs = currentHours * 3600 + currentMins * 60 + currentSecs;
+
+        let displayHour = currentHours % 12 || 12;
+        let timeString = `${convertToBengaliDigits(formatTimeNum(displayHour))}:${convertToBengaliDigits(formatTimeNum(currentMins))}:${convertToBengaliDigits(formatTimeNum(currentSecs))}`;
+        document.getElementById('live-clock').innerText = `বর্তমান সময়: ${timeString}`;
+
+        document.querySelectorAll('tr').forEach(tr => tr.classList.remove('highlight-row'));
+
+        let nextDhakaItem = null;
+        for (let item of dhakaToNgyTimes) {
+            if ((item.totalMins * 60) > currentTotalSecs) {
+                nextDhakaItem = item;
+                break;
+            }
+        }
+
+        if (nextDhakaItem) {
+            let diffSecs = (nextDhakaItem.totalMins * 60) - currentTotalSecs;
+            let diffH = Math.floor(diffSecs / 3600);
+            let diffM = Math.floor((diffSecs % 3600) / 60);
+            let diffS = diffSecs % 60;
+            
+            let countdownStr = `বাকি: `;
+            if (diffH > 0) countdownStr += `${convertToBengaliDigits(diffH)} ঘণ্টা `;
+            countdownStr += `${convertToBengaliDigits(diffM)} মিনিট ${convertToBengaliDigits(diffS)} সেকেন্ড`;
+
+            document.getElementById('next-dhaka').innerHTML = `${nextDhakaItem.period} ${nextDhakaItem.timeStr} ➔ ${nextDhakaItem.arr}`;
+            document.getElementById('countdown-dhaka').innerText = countdownStr;
+
+            const row = document.querySelector(`#tbody-dhaka tr[data-time="${nextDhakaItem.timeKey}"]`);
+            if (row) row.classList.add('highlight-row');
+        } else {
+            document.getElementById('next-dhaka').innerText = "আজকের সব ট্রেন শেষ";
+            document.getElementById('countdown-dhaka').innerText = "";
+        }
+
+        let nextNgyItem = null;
+        for (let item of ngyToDhakaTimes) {
+            if ((item.totalMins * 60) > currentTotalSecs) {
+                nextNgyItem = item;
+                break;
+            }
+        }
+
+        if (nextNgyItem) {
+            let diffSecs = (nextNgyItem.totalMins * 60) - currentTotalSecs;
+            let diffH = Math.floor(diffSecs / 3600);
+            let diffM = Math.floor((diffSecs % 3600) / 60);
+            let diffS = diffSecs % 60;
+            
+            let countdownStr = `বাকি: `;
+            if (diffH > 0) countdownStr += `${convertToBengaliDigits(diffH)} ঘণ্টা `;
+            countdownStr += `${convertToBengaliDigits(diffM)} মিনিট ${convertToBengaliDigits(diffS)} সেকেন্ড`;
+
+            document.getElementById('next-narayanganj').innerHTML = `${nextNgyItem.period} ${nextNgyItem.timeStr} ➔ ${nextNgyItem.arr}`;
+            document.getElementById('countdown-narayanganj').innerText = countdownStr;
+
+            const row = document.querySelector(`#tbody-narayanganj tr[data-time="${nextNgyItem.timeKey}"]`);
+            if (row) row.classList.add('highlight-row');
+        } else {
+            document.getElementById('next-narayanganj').innerText = "আজকের সব ট্রেন শেষ";
+            document.getElementById('countdown-narayanganj').innerText = "";
+        }
+
+        updateScheduleProgress(currentTotalSecs);
+    }
+
+    setInterval(updateApp, 1000);
+    updateApp();
+</script>
+
+</body>
+</html>

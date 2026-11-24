@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>?Ship Name? - Tank & ASTM 54B</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial,sans-serif;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html{
+    width:100%;
+    min-height:100%;
+    overflow-x:hidden;
+    -webkit-text-size-adjust:100%;
+}
+
+body{
+    width:100%;
+    min-height:100vh;
+    position:relative;
+    isolation:isolate;
+    overflow-x:hidden;
+    overflow-y:auto;
+    padding:5px;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    background:linear-gradient(135deg,#101447,#254b86,#087eaa,#35216b);
+    background-size:400% 400%;
+    animation:gradientBG 16s ease infinite;
+}
+
+@keyframes gradientBG{
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+
+/* Animated 3D background bubbles */
+.bubbles{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    z-index:-1;
+}
+
+.bubble{
+    position:absolute;
+    bottom:-100px;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.45);
+    background:radial-gradient(
+        circle at 30% 25%,
+        rgba(255,255,255,.65),
+        rgba(255,255,255,.08) 42%,
+        rgba(80,210,255,.12) 72%,
+        rgba(255,255,255,.02)
+    );
+    box-shadow:
+        inset -4px -5px 12px rgba(255,255,255,.08),
+        inset 3px 3px 9px rgba(255,255,255,.22),
+        0 0 12px rgba(120,220,255,.12);
+    animation:rise linear infinite;
+}
+
+.bubble:nth-child(1){
+    left:5%;width:34px;height:34px;animation-duration:15s;
+}
+.bubble:nth-child(2){
+    left:19%;width:18px;height:18px;animation-duration:11s;animation-delay:2s;
+}
+.bubble:nth-child(3){
+    left:34%;width:48px;height:48px;animation-duration:19s;animation-delay:4s;
+}
+.bubble:nth-child(4){
+    left:53%;width:24px;height:24px;animation-duration:13s;animation-delay:1s;
+}
+.bubble:nth-child(5){
+    left:70%;width:40px;height:40px;animation-duration:17s;animation-delay:5s;
+}
+.bubble:nth-child(6){
+    left:86%;width:22px;height:22px;animation-duration:12s;animation-delay:3s;
+}
+.bubble:nth-child(7){
+    left:44%;width:15px;height:15px;animation-duration:10s;animation-delay:6s;
+}
+.bubble:nth-child(8){
+    left:94%;width:52px;height:52px;animation-duration:21s;animation-delay:2s;
+}
+
+@keyframes rise{
+    0%{
+        transform:translate3d(0,0,0) scale(.8);
+        opacity:0;
+    }
+    10%{opacity:.65}
+    50%{transform:translate3d(18px,-50vh,0) scale(1)}
+    90%{opacity:.45}
+    100%{
+        transform:translate3d(-15px,-115vh,0) scale(1.15);
+        opacity:0;
+    }
+}
+
+.container{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:480px;
+    min-width:0;
+    padding:3px;
+    padding-bottom:250px;
+}
+
+/* 3D main title */
+.main-title{
+    position:relative;
+    overflow:hidden;
+    text-align:center;
+    color:#fff;
+    font-size:19px;
+    font-weight:900;
+    letter-spacing:1px;
+    padding:12px 8px;
+    margin-bottom:12px;
+    border-radius:15px;
+    border:1px solid rgba(255,255,255,.65);
+    background:linear-gradient(145deg,#19d3b1,#078c74 55%,#056452);
+    box-shadow:
+        0 7px 0 #064e48,
+        0 11px 18px rgba(0,0,0,.32),
+        inset 0 2px 2px rgba(255,255,255,.65),
+        inset 0 -4px 8px rgba(0,0,0,.16);
+    text-shadow:0 2px 3px rgba(0,0,0,.35);
+}
+
+.main-title::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:8%;
+    width:84%;
+    height:35%;
+    border-radius:0 0 50% 50%;
+    background:linear-gradient(to bottom,rgba(255,255,255,.3),transparent);
+    pointer-events:none;
+}
+
+/* 3D glass panels */
+.grid-section,.tank-grid{
+    width:100%;
+    min-width:0;
+    display:grid;
+    gap:7px;
+    padding:10px 7px;
+    margin-bottom:12px;
+    border-radius:15px;
+    border:1px solid rgba(255,255,255,.38);
+    background:linear-gradient(
+        145deg,
+        rgba(255,255,255,.23),
+        rgba(255,255,255,.07) 55%,
+        rgba(20,35,90,.2)
+    );
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    box-shadow:
+        0 7px 0 rgba(7,18,60,.48),
+        0 11px 20px rgba(0,0,0,.22),
+        inset 0 1px 1px rgba(255,255,255,.45),
+        inset 0 -3px 8px rgba(0,0,0,.1);
+}
+
+.tank-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:6px 5px;
+}
+
+.grid-section{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+}
+
+.input-group{
+    position:relative;
+    width:100%;
+    min-width:0;
+    margin-top:7px;
+}
+
+/* 3D input/output fields */
+.input-field,.output-field{
+    display:block;
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    height:39px;
+    padding:7px 2px 2px;
+    border-radius:9px;
+    border:1px solid #9be5ff;
+    outline:none;
+    appearance:none;
+    -webkit-appearance:none;
+    text-align:center;
+    font-size:11px;
+    font-weight:800;
+    color:#182a42;
+    background:linear-gradient(145deg,#fff,#dcecf8);
+    box-shadow:
+        0 3px 0 #7796b5,
+        0 5px 8px rgba(0,0,0,.19),
+        inset 0 2px 3px rgba(255,255,255,.95),
+        inset 0 -2px 4px rgba(80,110,145,.12);
+    transition:border-color .15s,box-shadow .15s;
+}
+
+.input-field:focus{
+    border-color:#68ffd0;
+    background:linear-gradient(145deg,#fff,#e0fff5);
+    box-shadow:
+        0 3px 0 #138d73,
+        0 0 12px rgba(73,255,204,.4),
+        inset 0 2px 3px #fff;
+}
+
+.output-field{
+    cursor:default;
+    border-color:#c0d0e0;
+    background:linear-gradient(145deg,#d7ffe9,#81d8aa);
+    box-shadow:
+        0 3px 0 #8294a9,
+        0 5px 7px rgba(0,0,0,.15),
+        inset 0 2px 3px rgba(255,255,255,.9);
+}
+
+.floating-label{
+    position:absolute;
+    z-index:2;
+    top:-9px;
+    left:5px;
+    max-width:calc(100% - 10px);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    padding:1px 5px;
+    border-radius:5px;
+    border:1px solid rgba(255,255,255,.5);
+    color:#fff;
+    background:linear-gradient(145deg,#354e70,#17263e);
+    font-size:8px;
+    font-weight:900;
+    line-height:14px;
+    box-shadow:
+        0 2px 4px rgba(0,0,0,.25),
+        inset 0 1px 1px rgba(255,255,255,.2);
+}
+
+/* 3D Intertek seal card */
+.seal-card{
+    width:100%;
+    min-width:0;
+    padding:10px 7px 12px;
+    margin:14px 0 16px;
+    border-radius:15px;
+    border:1px solid rgba(255,255,255,.45);
+    background:linear-gradient(
+        145deg,
+        rgba(255,255,255,.25),
+        rgba(255,255,255,.08) 55%,
+        rgba(20,35,90,.25)
+    );
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    box-shadow:
+        0 7px 0 rgba(7,18,60,.48),
+        0 11px 20px rgba(0,0,0,.22),
+        inset 0 1px 1px rgba(255,255,255,.45);
+}
+
+.seal-title{
+    text-align:center;
+    color:#fff;
+    font-size:14px;
+    font-weight:900;
+    letter-spacing:1px;
+    padding:8px;
+    margin-bottom:9px;
+    border-radius:9px;
+    border:1px solid rgba(255,255,255,.5);
+    background:linear-gradient(145deg,#4776e6,#2945a0);
+    box-shadow:
+        0 4px 0 #1b2e70,
+        0 6px 10px rgba(0,0,0,.2),
+        inset 0 2px 2px rgba(255,255,255,.35);
+    text-shadow:0 2px 3px rgba(0,0,0,.3);
+}
+
+.seal-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:7px;
+    align-items:center;
+}
+
+.seal-grid .input-group{
+    min-width:0;
+    margin-top:7px;
+}
+
+.seal-grid .input-field,
+.seal-grid .output-field{
+    height:39px;
+    font-size:12px;
+}
+
+.seal-grid .output-field{
+    background:linear-gradient(145deg,#d7ffe9,#81d8aa);
+    border-color:#42ad77;
+    box-shadow:
+        0 3px 0 #34865b,
+        0 5px 8px rgba(0,0,0,.18),
+        inset 0 2px 3px rgba(255,255,255,.8);
+}
+
+/* ASTM title */
+.astm-title{
+    position:relative;
+    text-align:center;
+    color:#fff;
+    font-size:16px;
+    font-weight:900;
+    letter-spacing:.6px;
+    padding:10px 7px;
+    margin:16px 0 12px;
+    border-radius:13px;
+    border:1px solid rgba(255,255,255,.65);
+    background:linear-gradient(145deg,#ffcf63,#f39b32 55%,#bd651b);
+    box-shadow:
+        0 6px 0 #914710,
+        0 9px 16px rgba(0,0,0,.25),
+        inset 0 2px 2px rgba(255,255,255,.7),
+        inset 0 -3px 6px rgba(110,50,0,.16);
+    text-shadow:0 2px 3px rgba(80,35,0,.4);
+}
+
+@media(max-width:360px){
+    body{padding:3px}
+    .container{padding:2px;padding-bottom:250px}
+    .tank-grid,.grid-section{padding-left:5px;padding-right:5px}
+    .tank-grid{gap:6px 4px}
+    .grid-section{gap:6px}
+    .input-field,.output-field{height:37px;font-size:10px}
+    .floating-label{font-size:7.5px}
+    .seal-grid{gap:5px}
+    .seal-grid .input-field,
+    .seal-grid .output-field{font-size:10px}
+    .seal-grid .floating-label{font-size:7px}
+}
+
+@media(prefers-reduced-motion:reduce){
+    body{animation:none}
+    .bubble{animation-duration:30s}
+}
+</style>
+</head>
+
+<body>
+
+<div class="bubbles" aria-hidden="true">
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+</div>
+
+<div class="container">
+
+    <div class="main-title" id="ship_title">?Ship Name?</div>
+
+    <div class="tank-grid" id="tankContainer"></div>
+
+    <div class="grid-section">
+        <div class="input-group">
+            <span class="floating-label">Total Dip</span>
+            <input type="text" id="total_dip" class="output-field" readonly value="0">
+        </div>
+
+        <div class="input-group">
+            <span class="floating-label">Total Liter</span>
+            <input type="text" id="total_liter" class="output-field" readonly value="0">
+        </div>
+    </div>
+
+    <!-- INTERTEK SEAL CARD -->
+    <div class="seal-card">
+        <div class="seal-title">INTERTEK SEAL</div>
+
+        <div class="seal-grid">
+            <div class="input-group">
+                <span class="floating-label">Start Seal Number</span>
+                <input
+                    type="number"
+                    id="startSeal"
+                    class="input-field"
+                    inputmode="numeric"
+                    step="1"
+                    placeholder="0"
+                    oninput="calculateSeals()">
+            </div>
+
+            <div class="input-group">
+                <span class="floating-label">End Seal Number</span>
+                <input
+                    type="number"
+                    id="endSeal"
+                    class="input-field"
+                    inputmode="numeric"
+                    step="1"
+                    placeholder="0"
+                    oninput="calculateSeals()">
+            </div>
+
+            <div class="input-group">
+                <span class="floating-label">Total Seal</span>
+                <input
+                    type="text"
+                    id="totalSeal"
+                    class="output-field"
+                    readonly
+                    placeholder="0">
+            </div>
+        </div>
+    </div>
+
+    <div class="astm-title">ASTM 53B / 54B</div>
+
+    <div class="grid-section">
+        <div class="input-group">
+            <span class="floating-label">Temperature</span>
+            <input type="number" id="temp" class="input-field" step="any" oninput="calcAll()">
+        </div>
+
+        <div class="input-group">
+            <span class="floating-label">Observe Density</span>
+            <input type="number" id="obsDensity" class="input-field" step="any" oninput="calcAll()">
+        </div>
+
+        <div class="input-group">
+            <span class="floating-label">Density 15</span>
+            <input type="text" id="den15" class="output-field" readonly>
+        </div>
+
+        <div class="input-group">
+            <span class="floating-label">VCF</span>
+            <input type="text" id="vcf" class="output-field" readonly>
+        </div>
+
+        <div class="input-group">
+            <span class="floating-label">Volume</span>
+            <input type="number" id="volume" class="input-field" step="any" oninput="onManualVolumeChange()">
+        </div>
+
+        <div class="input-group">
+            <span class="floating-label">Net Volume</span>
+            <input type="text" id="netVolume" class="output-field" readonly>
+        </div>
+
+        <div class="input-group">
+            <span class="floating-label">WCF</span>
+            <input type="text" id="wcf" class="output-field" readonly>
+        </div>
+
+        <div class="input-group">
+            <span class="floating-label">Liter</span>
+            <input type="text" id="liter" class="output-field" readonly>
+        </div>
+
+        <div class="input-group">
+            <span class="floating-label">M.T</span>
+            <input type="text" id="mt" class="output-field" readonly>
+        </div>
+
+        <div class="input-group">
+            <span class="floating-label">Barrels</span>
+            <input type="text" id="barrels" class="output-field" readonly>
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* =========================================
+   SETTINGS
+   এখানে 6, 8 অথবা 10 লিখবে।
+   ========================================= */
+
+const TANK_COUNT = 8;
+
+/* =========================================
+   LOCAL JSON DATABASE
+   কোনো fetch বা বাইরের URL নেই।
+   ========================================= */
+
+const DATABASE_TEXT =/*PUT_JSON_STRING_HERE*/;
+
+let d = {};
+let isManualVolume = false;
+
+const ALL_TANKS = [
+    'p1','s1','p2','s2','p3',
+    's3','p4','s4','p5','s5'
+];
+
+const TANK_LIMIT = [6,8,10].includes(TANK_COUNT)
+    ? TANK_COUNT
+    : 8;
+
+let t = ALL_TANKS.slice(0,TANK_LIMIT);
+
+const gVal = id => document.getElementById(id);
+
+const setVal = (id,value) => {
+    gVal(id).value = value;
+};
+
+function loadDatabase(){
+    try{
+        d = JSON.parse(DATABASE_TEXT);
+    }catch(error){
+        d = {};
+        console.error('Invalid tank database JSON:',error);
+    }
+}
+
+/* Create the requested number of tanks */
+function renderTanks(){
+    t = ALL_TANKS.slice(0,TANK_LIMIT);
+
+    gVal('tankContainer').innerHTML = t.map(x => `
+        <div class="input-group">
+            <span class="floating-label">${x.toUpperCase()} Dip</span>
+            <input
+                type="text"
+                inputmode="decimal"
+                autocomplete="off"
+                id="${x}_dip"
+                class="input-field"
+                oninput="onDipChange()">
+        </div>
+
+        <div class="input-group">
+            <span class="floating-label">${x.toUpperCase()} Liter</span>
+            <input
+                type="text"
+                id="${x}_liter"
+                class="output-field"
+                readonly>
+        </div>
+    `).join('');
+
+    calcAll();
+}
+
+/* Intertek seal count: End - Start + 1 */
+function calculateSeals(){
+    const start = gVal('startSeal').value.trim();
+    const end = gVal('endSeal').value.trim();
+    const result = gVal('totalSeal');
+
+    if(start === '' || end === ''){
+        result.value = '';
+        return;
+    }
+
+    const startNo = Number(start);
+    const endNo = Number(end);
+
+    if(
+        !Number.isFinite(startNo) ||
+        !Number.isFinite(endNo) ||
+        endNo < startNo
+    ){
+        result.value = '';
+        return;
+    }
+
+    result.value = endNo - startNo + 1;
+}
+
+/* Dip-to-Liter lookup with interpolation */
+const getL = (n,p,m) => {
+    if(!n || !Number.isFinite(m) || m<=0) return 0;
+
+    const exact = n[`${p}=${m}`];
+
+    if(exact!==undefined && exact!==null && exact!==''){
+        const value = parseFloat(exact);
+        return Number.isFinite(value) ? Math.round(value) : 0;
+    }
+
+    const base = Math.floor(m/10)*10;
+    const lower = parseFloat(n[`${p}=${base}`]);
+    const upper = parseFloat(n[`${p}=${base+10}`]);
+
+    if(Number.isNaN(lower)) return 0;
+    if(Number.isNaN(upper)) return Math.round(lower);
+
+    return Math.round(
+        lower+((m-base)/10)*(upper-lower)
+    );
+};
+
+const gA = dn =>
+    (dn<770
+        ? 341.0957
+        : dn<=788
+            ? 594.5418
+            : 186.9696+0.48618*dn
+    )/(dn*dn);
+
+function onDipChange(){
+    isManualVolume = false;
+    calcAll();
+}
+
+function onManualVolumeChange(){
+    isManualVolume = true;
+    calcAll();
+}
+
+function calcAll(){
+    const ship = gVal('ship_title').innerText.trim();
+
+    let totalDip = 0;
+    let totalLiter = 0;
+
+    t.forEach(x => {
+        const key = x.toUpperCase();
+        const dip = parseFloat(gVal(`${x}_dip`).value)||0;
+        const tankData = d?.[ship]?.[key];
+        const literValue = getL(tankData,key,dip);
+
+        setVal(`${x}_liter`,literValue>0 ? literValue : '');
+
+        totalDip += dip;
+        totalLiter += literValue;
+    });
+
+    setVal('total_dip',totalDip);
+    setVal('total_liter',totalLiter);
+
+    if(!isManualVolume){
+        setVal('volume',totalLiter>0 ? totalLiter : '');
+    }
+
+    const temp = parseFloat(gVal('temp').value);
+    const observedDensity = parseFloat(gVal('obsDensity').value);
+    const volume = parseFloat(gVal('volume').value);
+
+    if(!Number.isFinite(temp)||!Number.isFinite(observedDensity)){
+        [
+            'den15','vcf','netVolume','wcf',
+            'liter','mt','barrels'
+        ].forEach(id=>setVal(id,''));
+        return;
+    }
+
+    const deltaTemp = temp-15;
+    const remainder = observedDensity%1;
+
+    const obsD =
+        Math.abs(remainder-.25)<.001
+            ? Math.floor(observedDensity)
+            : Math.abs(remainder-.75)<.001
+                ? Math.ceil(observedDensity)
+                : Math.round(observedDensity*2)/2;
+
+    const alphaGlass = .000023;
+    const betaGlass = .000000002;
+
+    const hydD = obsD*(
+        1-alphaGlass*deltaTemp
+        -betaGlass*deltaTemp*deltaTemp
+    );
+
+    let density15 = hydD;
+
+    for(let i=0;i<25;i++){
+        const alpha = gA(density15);
+        const iterVCF = Math.exp(
+            -alpha*deltaTemp*(1+.8*alpha*deltaTemp)
+        );
+        density15 = hydD/iterVCF;
+    }
+
+    const roundedDensity15 = Math.round(density15*10)/10;
+    const finalAlpha = gA(roundedDensity15);
+
+    const rawVCF = Math.exp(
+        -finalAlpha*deltaTemp*
+        (1+.8*finalAlpha*deltaTemp)
+    );
+
+    if(!Number.isFinite(rawVCF)||rawVCF<=0){
+        [
+            'den15','vcf','netVolume','wcf',
+            'liter','mt','barrels'
+        ].forEach(id=>setVal(id,''));
+        return;
+    }
+
+    const vcf = parseFloat(rawVCF.toFixed(4));
+
+    setVal('den15',roundedDensity15.toFixed(1));
+    setVal('vcf',vcf.toFixed(4));
+
+    if(Number.isFinite(volume)){
+        const netV = volume*vcf;
+        const wcf = roundedDensity15-1.1;
+        const liter = netV*(wcf/1000);
+
+        setVal('netVolume',netV.toFixed(2));
+        setVal('wcf',wcf.toFixed(1));
+        setVal('liter',liter.toFixed(2));
+        setVal('mt',(liter/1000).toFixed(3));
+        setVal('barrels',(netV/158.987459).toFixed(2));
+    }else{
+        [
+            'netVolume','wcf','liter','mt','barrels'
+        ].forEach(id=>setVal(id,''));
+    }
+}
+
+window.addEventListener('load',function(){
+    loadDatabase();
+    renderTanks();
+});
+</script>
+
+</body>
+</html>

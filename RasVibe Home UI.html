@@ -741,7 +741,34 @@
 
 .video-option:active {background:#394861}
 
-.video-option span:last-child {
+.video-option-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fav-star-btn {
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 4px;
+  color: #94a3b8;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, color 0.15s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.fav-star-btn:active {
+  transform: scale(1.3);
+}
+.fav-star-btn.active {
+  color: #facc15;
+  text-shadow: 0 0 6px rgba(250, 204, 21, 0.7);
+}
+.video-option span:last-child,
+.video-option-actions span:last-child {
   color:#20d68a;
   font-weight:bold;
 }
@@ -2055,6 +2082,90 @@ document.getElementById("listBtn").addEventListener("click", function() {
 
 /* OPEN MOVIE */
 
+
+function getFavMovieKey(movie) {
+  return (movie && movie.title) ? movie.title.trim().toLowerCase() : "";
+}
+
+function isMovieFavorited(movie) {
+  try {
+    const list = JSON.parse(localStorage.getItem("rasvibe_fav_movies") || "[]");
+    const key = getFavMovieKey(movie);
+    return list.some(item => getFavMovieKey(item) === key);
+  } catch(e) {
+    return false;
+  }
+}
+
+function toggleMovieFavorite(movie) {
+  try {
+    let list = JSON.parse(localStorage.getItem("rasvibe_fav_movies") || "[]");
+    const key = getFavMovieKey(movie);
+    const idx = list.findIndex(item => getFavMovieKey(item) === key);
+    let nowFav = false;
+    if (idx >= 0) {
+      list.splice(idx, 1);
+      nowFav = false;
+    } else {
+      list.push({
+        title: movie.title || "",
+        img: movie.img || "",
+        link: movie.link || "",
+        date: movie.date || "",
+        details: movie.details || "",
+        _k: movie._k || (movie.title + " " + (movie.details || "")).toLowerCase(),
+        favTime: Date.now()
+      });
+      nowFav = true;
+    }
+    localStorage.setItem("rasvibe_fav_movies", JSON.stringify(list));
+    return nowFav;
+  } catch(e) {
+    return false;
+  }
+}
+
+window.__isFavoritesActive = false;
+window.toggleFavoritesFilter = function(forceState) {
+  if (typeof forceState === "boolean") {
+    window.__isFavoritesActive = forceState;
+  } else {
+    window.__isFavoritesActive = !window.__isFavoritesActive;
+  }
+
+  const liveWrapper = document.getElementById('liveWrapper');
+  const lfeWrapper = document.querySelector('.lfe-wrapper');
+  const categoryContainer = document.querySelector('.category-container');
+  const categoryTitleMain = document.getElementById('categoryTitleMain');
+
+  if (window.__isFavoritesActive) {
+    if (liveWrapper) liveWrapper.style.display = 'none';
+    if (lfeWrapper) lfeWrapper.style.display = 'none';
+    if (categoryContainer) categoryContainer.style.display = 'none';
+    if (categoryTitleMain) categoryTitleMain.style.display = 'none';
+
+    try {
+      const favList = JSON.parse(localStorage.getItem("rasvibe_fav_movies") || "[]");
+      const favSet = new Set(favList.map(item => getFavMovieKey(item)));
+      movies = allMovieItems.filter(m => favSet.has(getFavMovieKey(m)));
+      if (movies.length === 0 && favList.length > 0) {
+        movies = favList.slice();
+      }
+    } catch(e) {
+      movies = [];
+    }
+  } else {
+    if (liveWrapper) liveWrapper.style.display = showLiveSlider ? 'block' : 'none';
+    if (lfeWrapper) lfeWrapper.style.display = 'block';
+    if (categoryContainer) categoryContainer.style.display = 'flex';
+    if (categoryTitleMain) categoryTitleMain.style.display = 'block';
+    movies = (currentSearch !== '')
+      ? allMovieItems.filter(m => m._k.includes(currentSearch))
+      : allMovieItems.slice();
+  }
+  renderMovies();
+};
+
 function openMovie(index) {
   const movie = movies[index];
   if (!movie) return;
@@ -2072,6 +2183,8 @@ function openMovie(index) {
   const options = document.getElementById("videoOptions");
   options.innerHTML = "";
 
+  const movieFav = isMovieFavorited(movie);
+
   links.forEach((link) => {
     const button = document.createElement("button");
     button.className = "video-option";
@@ -2079,10 +2192,33 @@ function openMovie(index) {
     const name = document.createElement("span");
     name.textContent = link.label;
 
+    const actionWrap = document.createElement("div");
+    actionWrap.className = "video-option-actions";
+
+    const starBtn = document.createElement("span");
+    starBtn.className = "fav-star-btn" + (isMovieFavorited(movie) ? " active" : "");
+    starBtn.textContent = isMovieFavorited(movie) ? "★" : "☆";
+    starBtn.title = "Favorite";
+    starBtn.setAttribute("role", "button");
+    starBtn.setAttribute("aria-label", "Favorite toggle");
+    starBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const updatedFav = toggleMovieFavorite(movie);
+      const allStars = options.querySelectorAll(".fav-star-btn");
+      allStars.forEach(s => {
+        s.className = "fav-star-btn" + (updatedFav ? " active" : "");
+        s.textContent = updatedFav ? "★" : "☆";
+      });
+      if (window.__isFavoritesActive) {
+        window.toggleFavoritesFilter(true);
+      }
+    });
+
     const action = document.createElement("span");
     action.textContent = "WATCH ▶";
 
-    button.append(name, action);
+    actionWrap.append(starBtn, action);
+    button.append(name, actionWrap);
     button.addEventListener("click", () => {
       selectMovie(movie, link);
     });

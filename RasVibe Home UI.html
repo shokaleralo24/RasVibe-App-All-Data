@@ -2119,11 +2119,54 @@ function toggleMovieFavorite(movie) {
       nowFav = true;
     }
     localStorage.setItem("rasvibe_fav_movies", JSON.stringify(list));
+
+    // Instantly notify Android native interface
+    try {
+      const msg = "FAV_UPDATE>" + JSON.stringify(list);
+      if (window.AppInventor && typeof window.AppInventor.setWebViewString === "function") {
+        window.AppInventor.setWebViewString(msg);
+      } else if (window.CustomWebView && typeof window.CustomWebView.setWebViewString === "function") {
+        window.CustomWebView.setWebViewString(msg);
+      }
+    } catch(err) {}
+
     return nowFav;
   } catch(e) {
     return false;
   }
 }
+
+// Handler for when an item is removed from Android Native Favorite card
+window.onFavoriteRemovedFromNative = function(titleKey) {
+  try {
+    let list = JSON.parse(localStorage.getItem("rasvibe_fav_movies") || "[]");
+    const k = (titleKey || "").trim().toLowerCase();
+    list = list.filter(item => getFavMovieKey(item) !== k);
+    localStorage.setItem("rasvibe_fav_movies", JSON.stringify(list));
+
+    const options = document.getElementById("videoOptions");
+    if (options) {
+      const allStars = options.querySelectorAll(".fav-star-btn");
+      allStars.forEach(s => {
+        s.className = "fav-star-btn";
+        s.textContent = "☆";
+      });
+    }
+  } catch(e) {}
+};
+
+// Initial broadcast to Android
+setTimeout(() => {
+  try {
+    const list = JSON.parse(localStorage.getItem("rasvibe_fav_movies") || "[]");
+    const msg = "FAV_UPDATE>" + JSON.stringify(list);
+    if (window.AppInventor && typeof window.AppInventor.setWebViewString === "function") {
+      window.AppInventor.setWebViewString(msg);
+    } else if (window.CustomWebView && typeof window.CustomWebView.setWebViewString === "function") {
+      window.CustomWebView.setWebViewString(msg);
+    }
+  } catch(e) {}
+}, 900);
 
 window.__isFavoritesActive = false;
 window.toggleFavoritesFilter = function(forceState) {

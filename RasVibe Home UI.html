@@ -112,13 +112,30 @@
             overflow-x: visible !important;
             overflow-y: visible !important;
             scroll-snap-type: none !important;
-            gap: 10px !important;
+            gap: 8px !important;
         }
-        .live-slider-container.vertical-view .card,
-        .lfe-slider-container.vertical-view .card {
-            flex: 1 1 100% !important;
+        .live-slider-container.vertical-view .card {
+            flex: 0 0 auto !important;
             max-width: 100% !important;
             width: 100% !important;
+            height: 78px !important;
+            margin-bottom: 0 !important;
+        }
+        .lfe-slider-container.vertical-view .card {
+            flex: 0 0 auto !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            height: 52px !important; /* ভার্টিক্যাল ভিউতে কার্ডের হাইট কমিয়ে স্লিম করা হলো */
+            margin-bottom: 0 !important;
+        }
+        .lfe-slider-container.vertical-view .card-play-indicator {
+            width: 28px !important;
+            height: 28px !important;
+            font-size: 11px !important;
+        }
+        .lfe-slider-container.vertical-view .lfe-card-title {
+            font-size: 8px !important;
+            padding: 1px 4px !important;
         }
 
         .cat-btn { background: #161b22; color: #10b981; border: 2px solid #10b981; padding: 2px 7px; border-radius: 10px; cursor: pointer; font-size: 6px; font-weight: bold; flex-shrink: 0; } /* ফন্ট সাইজ আরও ২০% কমানো হয়েছে */

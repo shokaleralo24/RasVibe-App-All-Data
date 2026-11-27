@@ -32,6 +32,7 @@
         }
         .live-slider-container::-webkit-scrollbar { display: none; }
         .live-slider-container .card {
+            position: relative !important;
             flex: 0 0 85% !important;
             max-width: 320px !important;
             height: 82px !important;
@@ -66,6 +67,7 @@
         }
         .lfe-slider-container::-webkit-scrollbar { display: none; }
         .lfe-slider-container .card {
+            position: relative !important;
             flex: 0 0 65% !important;
             max-width: 220px !important;
             height: 80px !important;
@@ -441,22 +443,58 @@
   background:linear-gradient(transparent,rgba(0,0,0,.8));
 }
 
-.play-icon {
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  background:rgba(229,9,53,.9);
-  display:grid;
-  place-items:center;
-  font-size:14px;
-  opacity:0;
+.play-icon,
+.card-play-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(229, 9, 53, 0.95);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
 }
 
-.movie-card:active .play-icon {opacity:1}
+.movie-card:active .play-icon,
+.card:active .card-play-indicator,
+.ltv-card:active .card-play-indicator {
+  opacity: 1;
+}
+
+/* Kept visible on active playing card */
+.movie-card.is-playing .play-icon,
+.card.is-playing .card-play-indicator,
+.ltv-card.is-playing .card-play-indicator {
+  opacity: 1 !important;
+  transform: translate(-50%, -50%) scale(1.08);
+  box-shadow: 0 0 16px rgba(229, 9, 53, 0.95), 0 0 4px #ffffff;
+}
+
+.movie-card.is-playing .poster {
+  border: 1.5px solid #e50935 !important;
+  box-shadow: 0 0 12px rgba(229, 9, 53, 0.5);
+}
+
+.card.is-playing,
+.ltv-card.is-playing {
+  border-color: #e50935 !important;
+  box-shadow: 0 0 12px rgba(229, 9, 53, 0.5) !important;
+}
+
+.list-view .movie-card.is-playing .play-icon {
+  display: flex !important;
+  opacity: 1 !important;
+}
 
 .quality-tag {
   position:absolute;
@@ -789,6 +827,7 @@
 }
 .ltv-slider-container::-webkit-scrollbar { display: none; }
 .ltv-card {
+    position: relative !important;
     flex: 0 0 96px;
     height: 60px;
     border-radius: 12px;
@@ -1172,6 +1211,47 @@ function sortMatches(list) {
     });
 }
 
+
+window.__activePlayingCard = null;
+window.__activePlayingTitle = "";
+
+function setActivePlayingCard(cardElement, title) {
+    if (window.__activePlayingCard && window.__activePlayingCard !== cardElement) {
+        window.__activePlayingCard.classList.remove("is-playing");
+    }
+    const allCards = document.querySelectorAll(".movie-card, .card, .ltv-card");
+    allCards.forEach(function(c) {
+        if (c !== cardElement) c.classList.remove("is-playing");
+    });
+    if (cardElement) {
+        cardElement.classList.add("is-playing");
+        window.__activePlayingCard = cardElement;
+    }
+    if (title) {
+        window.__activePlayingTitle = String(title).trim().toLowerCase();
+    }
+}
+
+function setActivePlayingTitle(title) {
+    if (!title) return;
+    const clean = String(title).trim().toLowerCase();
+    window.__activePlayingTitle = clean;
+    const allCards = document.querySelectorAll(".movie-card, .card, .ltv-card");
+    allCards.forEach(function(c) {
+        const t = (c.getAttribute("data-title") || "").trim().toLowerCase();
+        if (t && (t === clean || clean.includes(t) || t.includes(clean))) {
+            c.classList.add("is-playing");
+            window.__activePlayingCard = c;
+        } else {
+            c.classList.remove("is-playing");
+        }
+    });
+}
+
+window.setExternalActivePlayingTitle = function(title) {
+    setActivePlayingTitle(title);
+};
+
 function buildMatchCard(match) {
     const defaultLogoUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='20' fill='%231e293b'/%3E%3Cpath d='M20 10l8 4v6c0 5-3.5 9.7-8 11-4.5-1.3-8-6-8-11v-6l8-4z' fill='%2310b981'/%3E%3C/svg%3E"; 
     let card = document.createElement("div");
@@ -1196,7 +1276,20 @@ function buildMatchCard(match) {
 
     const liveTeams = [match.team1Title, match.team2Title].filter(Boolean).join(" vs ");
     const liveTitle = [match.eventTitle, liveTeams].filter(Boolean).join(" - ");
-    card.onclick = function() { sendMedia(liveTitle, "", match.streamLink); };
+    card.setAttribute("data-title", liveTitle);
+    if (window.__activePlayingTitle && liveTitle && (window.__activePlayingTitle === liveTitle.toLowerCase() || liveTitle.toLowerCase().includes(window.__activePlayingTitle))) {
+        card.classList.add("is-playing");
+        window.__activePlayingCard = card;
+    }
+    const playIndicator = document.createElement("div");
+    playIndicator.className = "card-play-indicator";
+    playIndicator.textContent = "▶";
+    card.appendChild(playIndicator);
+
+    card.onclick = function() {
+        setActivePlayingCard(card, liveTitle);
+        sendMedia(liveTitle, "", match.streamLink);
+    };
     card.innerHTML = `
         ${match.isHot ? '<div class="hot-badge">HOT 🔥</div>' : ""}
         <div class="league-header" title="${match.eventTitle}">${match.eventTitle}</div>         
@@ -1475,7 +1568,21 @@ function buildLfeCard(ch) {
 
     const card = document.createElement('div');
     card.className = 'card';
-    card.onclick = () => sendMedia(ch.name || "", "", ch.url);
+    const lfeTitle = (ch.name || "").trim();
+    card.setAttribute("data-title", lfeTitle);
+    if (window.__activePlayingTitle && lfeTitle && (window.__activePlayingTitle === lfeTitle.toLowerCase() || lfeTitle.toLowerCase().includes(window.__activePlayingTitle))) {
+        card.classList.add("is-playing");
+        window.__activePlayingCard = card;
+    }
+    const playIndicator = document.createElement("div");
+    playIndicator.className = "card-play-indicator";
+    playIndicator.textContent = "▶";
+    card.appendChild(playIndicator);
+
+    card.onclick = () => {
+        setActivePlayingCard(card, lfeTitle);
+        sendMedia(ch.name || "", "", ch.url);
+    };
     card.innerHTML = `
         <div class="lfe-logo-box">
             <div style="position: absolute; top: 7px; left: 7px; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; overflow: hidden; z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">
@@ -1968,6 +2075,12 @@ function buildMovieCard(movie, originalIndex) {
 
   const card = document.createElement("div");
   card.className = "movie-card";
+  const movieTitle = (movie.title || "").trim();
+  card.setAttribute("data-title", movieTitle);
+  if (window.__activePlayingTitle && movieTitle && (window.__activePlayingTitle === movieTitle.toLowerCase() || window.__activePlayingTitle.includes(movieTitle.toLowerCase()))) {
+    card.classList.add("is-playing");
+    window.__activePlayingCard = card;
+  }
 
   const poster = document.createElement("div");
   poster.className = "poster";
@@ -2287,6 +2400,9 @@ function selectMovie(movie, selectedLink) {
     ? (movie.title || "") + " - " + selectedLabel
     : (movie.title || "");
 
+  const movieTitle = (movie.title || "").trim();
+  setActivePlayingTitle(movieTitle);
+
   const payload = {
     title: finalTitle,
     thumbnail: cleanImageUrl(movie.img),
@@ -2504,7 +2620,19 @@ window.MovieHub = {
             img.src = ch.logo || LTV_FALLBACK;
             card.appendChild(img);
 
+            const ltvTitle = (ch.title || "").trim();
+            card.setAttribute("data-title", ltvTitle);
+            if (window.__activePlayingTitle && ltvTitle && (window.__activePlayingTitle === ltvTitle.toLowerCase() || ltvTitle.toLowerCase().includes(window.__activePlayingTitle))) {
+                card.classList.add("is-playing");
+                window.__activePlayingCard = card;
+            }
+            var playIndicator = document.createElement("div");
+            playIndicator.className = "card-play-indicator";
+            playIndicator.textContent = "▶";
+            card.appendChild(playIndicator);
+
             card.addEventListener("click", function () {
+                setActivePlayingCard(card, ltvTitle);
                 if (typeof sendMedia === "function") { sendMedia(ch.title || "", "", ch.link || ""); return; }
                 // Same output as sendMedia, used only if the first script could not run
                 var out = JSON.stringify({ title: String(ch.title || "").trim(), thumbnail: "", videoUrl: String(ch.link || "").trim() });

@@ -168,52 +168,6 @@ input[readonly] {
   font-weight: 800;
 }
 
-/* 3D Intertek seal card */
-.seal-card {
-  width: 100%;
-  min-width: 0;
-  padding: 10px 8px 12px;
-  margin: 12px 0 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.15),
-    rgba(255, 255, 255, 0.05) 55%,
-    rgba(15, 23, 42, 0.5)
-  );
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-  box-sizing: border-box;
-}
-
-.seal-title {
-  text-align: center;
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 900;
-  letter-spacing: 0.8px;
-  padding: 7px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  background: linear-gradient(145deg, #3b82f6, #1d4ed8);
-  box-shadow: 0 3px 0 #1e3a8a, 0 5px 8px rgba(0, 0, 0, 0.25);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-}
-
-.seal-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
-  align-items: center;
-}
-
-.seal-grid .input-group {
-  min-width: 0;
-  margin-top: 6px;
-}
 
 /* ASTM title banner */
 .astm-title {
@@ -554,43 +508,6 @@ button:active {
         </div>
     </div>
 
-    <!-- INTERTEK SEAL CARD -->
-    <div class="seal-card">
-        <div class="seal-title">INTERTEK SEAL</div>
-        <div class="seal-grid">
-            <div class="input-group">
-                <span class="floating-label">Start Seal Number</span>
-                <input
-                    type="number"
-                    id="startSeal"
-                    class="input-field"
-                    inputmode="numeric"
-                    step="1"
-                    placeholder="0"
-                    oninput="calculateSeals()">
-            </div>
-            <div class="input-group">
-                <span class="floating-label">End Seal Number</span>
-                <input
-                    type="number"
-                    id="endSeal"
-                    class="input-field"
-                    inputmode="numeric"
-                    step="1"
-                    placeholder="0"
-                    oninput="calculateSeals()">
-            </div>
-            <div class="input-group">
-                <span class="floating-label">Total Seal</span>
-                <input
-                    type="text"
-                    id="totalSeal"
-                    class="output-field"
-                    readonly
-                    placeholder="0">
-            </div>
-        </div>
-    </div>
 
     <!-- ASTM 53B / 54B -->
     <div class="astm-title">ASTM 53B / 54B</div>
@@ -901,35 +818,6 @@ button:active {
         saveState();
     };
 
-    // Calculate Intertek Seals (End - Start + 1)
-    function calculateSeals() {
-        var startEl = $('startSeal');
-        var endEl = $('endSeal');
-        var totalEl = $('totalSeal');
-        if (!startEl || !endEl || !totalEl) return;
-
-        var start = startEl.value.trim();
-        var end = endEl.value.trim();
-
-        if (start === '' || end === '') {
-            totalEl.value = '';
-            saveState();
-            return;
-        }
-
-        var startNo = Number(start);
-        var endNo = Number(end);
-
-        if (!Number.isFinite(startNo) || !Number.isFinite(endNo) || endNo < startNo) {
-            totalEl.value = '';
-            saveState();
-            return;
-        }
-
-        totalEl.value = (endNo - startNo + 1);
-        saveState();
-    }
-    window.calculateSeals = calculateSeals;
 
     // Manual volume override
     window.onManualVolumeChange = function() {
@@ -1033,8 +921,6 @@ button:active {
                 tank: $('tankSelector') ? $('tankSelector').value : 'Tank 04',
                 openingDip: $('openingDip') ? $('openingDip').value : '',
                 closingDip: $('closingDip') ? $('closingDip').value : '',
-                startSeal: $('startSeal') ? $('startSeal').value : '',
-                endSeal: $('endSeal') ? $('endSeal').value : '',
                 temp: $('temp') ? $('temp').value : '',
                 obsDensity: $('obsDensity') ? $('obsDensity').value : '',
                 volume: $('volume') ? $('volume').value : '',
@@ -1066,8 +952,6 @@ button:active {
                 if (state.tank && $('tankSelector')) $('tankSelector').value = state.tank;
                 if (state.openingDip !== undefined && $('openingDip')) $('openingDip').value = state.openingDip;
                 if (state.closingDip !== undefined && $('closingDip')) $('closingDip').value = state.closingDip;
-                if (state.startSeal !== undefined && $('startSeal')) $('startSeal').value = state.startSeal;
-                if (state.endSeal !== undefined && $('endSeal')) $('endSeal').value = state.endSeal;
                 if (state.temp !== undefined && $('temp')) $('temp').value = state.temp;
                 if (state.obsDensity !== undefined && $('obsDensity')) $('obsDensity').value = state.obsDensity;
                 if (state.volume !== undefined && $('volume')) $('volume').value = state.volume;
@@ -1332,7 +1216,6 @@ button:active {
 
     // Initialize: restore state and load data
     restoreState();
-    calculateSeals();
     loadTankData(function(data) {
         if (data) {
             window.calculateAll();

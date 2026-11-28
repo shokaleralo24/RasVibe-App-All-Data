@@ -2423,7 +2423,9 @@ function selectMovie(movie, selectedLink) {
   const payload = {
     title: finalTitle,
     thumbnail: cleanImageUrl(movie.img),
-    videoUrl: parsed.videoUrl
+    videoUrl: parsed.videoUrl,
+    isMovie: true,
+    rawLinks: String(movie.link || "").trim()
   };
 
   const output = JSON.stringify(payload);

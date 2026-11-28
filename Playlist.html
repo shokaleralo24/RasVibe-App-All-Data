@@ -48,11 +48,11 @@
         }
     </style>
 <script id="ras-theme-engine">
-/* RasVibe Light/Dark theme engine — follows the theme chosen in the RasVibe app */
+/* RasVibe Light/Dark/Custom theme engine — follows the theme chosen in the RasVibe app */
 (function(){
 if(window.__rasTheme)return;
-var T=window.__rasTheme={native:null,mode:null};
-var KEY='rasvibe_theme';
+var T=window.__rasTheme={native:null,mode:null,accent:null,accentHex:'',flip:false,srcHue:null};
+var KEY='rasvibe_theme',AKEY='rasvibe_accent';
 var COLOR_RE=/#[0-9a-fA-F]{3,8}\b|rgba?\([^)]*\)|\b(?:white|black)\b/gi;
 var PROP_RE=/color|background|border|outline|shadow|fill|stroke|^--/i;
 var FG_RE=/^(color|fill|stroke|caret-color|-webkit-text-fill-color|text-decoration-color)$/i;
@@ -62,6 +62,50 @@ function wanted(){
   try{if(window.RasThemeBridge&&RasThemeBridge.isLight){var l=RasThemeBridge.isLight();l=(l===true||l==='true');try{localStorage.setItem(KEY,l?'light':'dark');}catch(e){}return l?'light':'dark';}}catch(e){}
   try{var s=localStorage.getItem(KEY);if(s==='light'||s==='dark')return s;}catch(e){}
   return null;
+}
+function wantedAccent(){
+  try{if(window.RasThemeBridge&&RasThemeBridge.getAccent){var a=String(RasThemeBridge.getAccent()||'');try{localStorage.setItem(AKEY,a);}catch(e){}return a;}}catch(e){}
+  try{var s=localStorage.getItem(AKEY);if(s)return s;}catch(e){}
+  return '';
+}
+function setAccent(hex){
+  hex=(hex||'').trim();T.accentHex=hex;T.accent=null;
+  if(!/^#[0-9a-fA-F]{6}$/.test(hex))return;
+  var c=parse(hex),h=toHsl(c[0],c[1],c[2]);T.accent=[h[0],h[1]];
+}
+function hueDist(a,b){var d=Math.abs(a-b)%360;return d>180?360-d:d;}
+/* Finds the page's own main accent hue (red is skipped: it is kept for LIVE / error badges) */
+function detectSrcHue(){
+  var buckets={},samples=[];
+  function add(v){if(!v)return;var m=v.match(COLOR_RE);if(!m)return;
+    for(var i=0;i<m.length;i++){var c=parse(m[i]);if(!c||c[3]<0.3)continue;
+      var h=toHsl(c[0],c[1],c[2]),hd=h[0]*360;
+      if(h[1]<0.45||h[2]<0.2||h[2]>0.85||hd>=340||hd<20)continue;
+      var k=Math.floor(hd/15);buckets[k]=(buckets[k]||0)+1;samples.push(hd);}}
+  function walk(rules){if(!rules)return;for(var i=0;i<rules.length;i++){var r=rules[i];
+    if(r.style)for(var k=0;k<r.style.length;k++){var p=r.style[k];if(PROP_RE.test(p))add(r.style.getPropertyValue(p));}
+    if(r.cssRules)walk(r.cssRules);}}
+  var ss=document.styleSheets;for(var i=0;i<ss.length;i++){try{walk(ss[i].cssRules);}catch(e){}}
+  if(document.body){var els=document.body.querySelectorAll('[style]');for(var j=0;j<els.length&&j<600;j++)add(els[j].getAttribute('style'));}
+  var best=-1,bc=0;for(var key in buckets){var n=buckets[key]+(buckets[+key-1]||0)*0.5+(buckets[+key+1]||0)*0.5;if(n>bc){bc=n;best=+key;}}
+  if(best<0)return 200;
+  var sx=0,sy=0;samples.forEach(function(hd){if(hueDist(hd,best*15+7.5)<=25){sx+=Math.cos(hd*Math.PI/180);sy+=Math.sin(hd*Math.PI/180);}});
+  var a=Math.atan2(sy,sx)*180/Math.PI;return a<0?a+360:a;
+}
+/* Custom theme: the page's main accent family takes the chosen color, slate neutrals get a soft tint */
+function customize(c){
+  var r=Math.round(c[0]),g=Math.round(c[1]),b=Math.round(c[2]);
+  if(r===g&&g===b)return c;
+  var hsl=toHsl(r,g,b),h=hsl[0]*360,s=hsl[1],l=hsl[2],nh,ns;
+  var src=T.srcHue==null?200:T.srcHue,target=T.accent[0]*360;
+  if(s>=0.45&&l>=0.2&&l<=0.85&&(hueDist(h,src)<=35||(h>=185&&h<=245))){
+    var base=hueDist(h,src)<=35?src:215;
+    nh=target+((h-base+540)%360-180);ns=Math.min(1,s*T.accent[1]/0.9);
+  }else if(s<0.45&&h>=180&&h<=250){
+    nh=target;ns=Math.min(0.55,s*Math.min(1.2,0.35+T.accent[1]));
+  }else return c;
+  nh=((nh%360)+360)%360;
+  var o=fromHsl(nh/360,ns,l);return[o[0],o[1],o[2],c[3]];
 }
 function parse(t){
   t=t.toLowerCase();
@@ -93,6 +137,8 @@ function mapC(c,role){
   var a=c[3];if(a===0)return c;
   var r=Math.round(c[0]),g=Math.round(c[1]),b=Math.round(c[2]);
   if(r===0&&g===0&&b===0&&a<1)return c; /* shadows & dim layers stay dark */
+  if(T.accent){c=customize(c);r=Math.round(c[0]);g=Math.round(c[1]);b=Math.round(c[2]);}
+  if(!T.flip)return c;
   var hsl=toHsl(r,g,b),s=hsl[1],l=hsl[2],nl=l;
   role=role||'any';
   if(T.mode==='light'){ /* dark page -> light */
@@ -148,7 +194,7 @@ function themeStyle(st){
   var keepAll=false,keepFg=false;
   if(bg&&bg[3]>0){
     var bl=toHsl(bg[0],bg[1],bg[2])[2];
-    if(T.mode==='light'&&bg[3]<0.8&&bl<0.12)keepAll=true; /* dark glass over images/video: keep as is */
+    if(T.flip&&T.mode==='light'&&bg[3]<0.8&&bl<0.12)keepAll=true; /* dark glass over images/video: keep as is */
     else if(bg[3]>=0.6){
       var nb=lum(mapC(bg,'bg'));
       if(nb<0.40)keepFg='light';
@@ -267,28 +313,33 @@ function restore(){
 }
 function apply(){
   var w=T.wanted;
-  if(!T.native)T.native=detectNative();
-  var need=!!w&&w!==T.native;
   if(T.active){T.active=false;restore();baseStyle(false);}
+  if(!T.native)T.native=detectNative();
+  T.flip=!!w&&w!==T.native;
+  if(T.accent&&T.srcHue==null)T.srcHue=detectSrcHue();
+  var need=T.flip||!!T.accent;
   if(!need){T.mode=T.native;document.documentElement.setAttribute('data-ras-theme',T.native);return;}
-  T.mode=w;T.active=true;
-  document.documentElement.setAttribute('data-ras-theme',w);
-  themeSheets();baseStyle(true);
+  T.mode=T.flip?w:T.native;T.active=true;
+  document.documentElement.setAttribute('data-ras-theme',T.mode);
+  if(T.accent)document.documentElement.setAttribute('data-ras-accent',T.accentHex);else document.documentElement.removeAttribute('data-ras-accent');
+  themeSheets();if(T.flip)baseStyle(true);
   if(document.body)themeTree(document.body);
   startObserver();
 }
-T.set=function(mode){
+T.set=function(mode,accent){
   if(mode!=='light'&&mode!=='dark')return;
-  try{localStorage.setItem(KEY,mode);}catch(e){}
-  if(T.wanted===mode&&T.ready)return;
-  T.wanted=mode;apply();
+  accent=accent===undefined?T.accentHex:(accent||'');
+  try{localStorage.setItem(KEY,mode);localStorage.setItem(AKEY,accent);}catch(e){}
+  if(T.wanted===mode&&T.accentHex===accent&&T.ready)return;
+  T.wanted=mode;setAccent(accent);apply();
 };
 T.wanted=wanted();
+setAccent(wantedAccent());
 T.ready=true;
-if(T.wanted)apply();
+if(T.wanted||T.accent)apply();
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',function(){
-    if(!T.wanted)return;
+    if(!T.wanted&&!T.accent)return;
     if(T.active){themeSheets();themeTree(document.body);}
     else{T.native=null;apply();}
   });
